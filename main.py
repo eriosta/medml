@@ -1,12 +1,12 @@
 import streamlit as st
 import streamlit_toggle as tog
-from data import setup_kaggle_env_variables, download_kaggle_dataset
+from data import setup_kaggle_env_variables, download_kaggle_dataset, display_metadata
 from eda import generate_eda
 import pandas as pd
 import os
 from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
 
-st.title("MEDML")
+st.sidebar.title("MEDML")
 
 # Initialize dataset and dataset name in session state
 if 'df' not in st.session_state:
@@ -19,9 +19,45 @@ if st.session_state.dataset_name:
 else:
     st.sidebar.info("No dataset currently loaded")
 
-nav = st.sidebar.radio("Navigation", ["Data", "Exploratory Data Analysis", "Models"])
+nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data Analysis", "Models"])
 
-if nav == "Data":
+if nav == "Get Started":
+    st.header("Get Started with MEDML 🚀")
+
+    st.subheader("Step 1: Load Your Data")
+    st.write("""
+    Choose one of the methods:
+    - **From Kaggle (Optional)**: 
+        1. Enter your Kaggle credentials.
+        2. Select a dataset from the provided list or specify the path of another.
+    - **From Local Drive**: 
+        1. Simply drag and drop your CSV file.
+    """)
+
+    st.subheader("Step 2: Dive into Exploratory Data Analysis (EDA)")
+    st.write("""
+    1. Navigate to the 'Exploratory Data Analysis' tab.
+    2. Explore the generated insights and visualizations of your data.
+    """)
+
+    st.subheader("Step 3: Train Your Model")
+    st.write("""
+    - **Setup**:
+        1. Select your target variable.
+        2. Choose the training variables.
+    - **Customization (Optional)**:
+        1. Pick from a range of models.
+        2. Define the train-test split.
+        3. Toggle 'Optimize Hyperparameters' if you want to experiment and potentially enhance performance. 
+    - **Execution**:
+        1. Click 'Train Models'.
+        2. View the results and performance metrics.
+    """)
+
+    st.markdown("Now, navigate using the sidebar and embark on your data journey! 🎉")
+
+elif nav == "Data":
+
     data_source = st.sidebar.radio("Choose Data Source", ["Kaggle", "Upload CSV"])
 
     if data_source == "Kaggle":
@@ -43,6 +79,9 @@ if nav == "Data":
             "mirichoi0218/insurance",
             "protobioengineering/mit-bih-arrhythmia-database-modern-2023"
         ]
+
+        # Display the table
+        display_metadata(existing_datasets)
 
         dataset_choice = st.sidebar.selectbox("Choose a Kaggle Dataset", ["Other Kaggle Dataset"] + existing_datasets)
         dataset_path = dataset_choice if dataset_choice != "Other Kaggle Dataset" else st.sidebar.text_input("Enter Kaggle Dataset Path")
@@ -72,7 +111,6 @@ if nav == "Data":
             st.session_state.df = pd.read_csv(uploaded_file)
             st.session_state.dataset_name = uploaded_file.name  # store actual filename to session state
             st.write(st.session_state.df.head())
-
 
 elif nav == "Exploratory Data Analysis":
     if st.session_state.df is not None:
