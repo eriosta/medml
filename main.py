@@ -1,9 +1,10 @@
 import streamlit as st
+import streamlit_toggle as tog
 from data import setup_kaggle_env_variables, download_kaggle_dataset
 from eda import generate_eda
 import pandas as pd
 import os
-from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
+from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
 
 st.title("Kaggle Dataset Streamlit App")
 
@@ -78,8 +79,14 @@ elif nav == "Model Training":
         
         model_selection = st.multiselect("Select Models", ["Logistic Regression", "Random Forest Classifier", "Gradient Boosting Classifier", "Decision Tree Classifier"])
         
-        # Choice for Hyperparameter Optimization
-        optimize_hyperparams = st.checkbox('Optimize Hyperparameters?')
+        # Choice for Hyperparameter Optimization using toggle
+        optimize_hyperparams = tog.st_toggle_switch(label="Optimize Hyperparameters?", 
+                                                    key="optimize_hyperparams_key", 
+                                                    default_value=False, 
+                                                    label_after=False, 
+                                                    inactive_color='#D3D3D3', 
+                                                    active_color="#11567f", 
+                                                    track_color="#29B5E8")
 
         selected_models = {}
         all_models = {
@@ -91,6 +98,13 @@ elif nav == "Model Training":
 
         for model in model_selection:
             selected_models[model] = all_models[model]
+
+            if optimize_hyperparams:
+                user_defined_params = get_model_hyperparameters(model)
+                base_model = all_models[model]
+                # Update base model with user-defined hyperparameters
+                base_model.set_params(**user_defined_params)
+                selected_models[model] = base_model
 
         if st.button("Train Models"):
             results = train_and_evaluate_models(X_train, y_train, X_test, y_test, selected_models, optimize_hyperparams)

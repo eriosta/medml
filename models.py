@@ -1,4 +1,6 @@
 import pandas as pd
+from time import sleep
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,6 +29,32 @@ def prepare_data(df, VAR, categorical_features):
     X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.2, random_state=42)
     return X_train, X_test, y_train, y_test
 
+def get_model_hyperparameters(model_name):
+    """Retrieve user-defined hyperparameters for a given model."""
+    params = {}
+
+    if model_name == "Logistic Regression":
+        st.subheader("Logistic Regression Hyperparameters")
+        params["C"] = st.slider("Regularization strength (C)", 0.001, 100.0, 1.0, 0.001)
+        params["max_iter"] = st.slider("Maximum Iterations", 1000, 20000, 10000, 1000)
+        params["class_weight"] = st.selectbox("Class Weight", [None, "balanced"])
+        
+    elif model_name == "Random Forest Classifier":
+        st.subheader("Random Forest Classifier Hyperparameters")
+        params["n_estimators"] = st.slider("Number of Trees (n_estimators)", 50, 150, 100, 10)
+        params["max_depth"] = st.selectbox("Max Depth", [None, 5, 10])
+
+    elif model_name == "Gradient Boosting Classifier":
+        st.subheader("Gradient Boosting Classifier Hyperparameters")
+        params["learning_rate"] = st.slider("Learning Rate", 0.01, 0.1, 0.05, 0.01)
+        params["n_estimators"] = st.slider("Number of Boosting Rounds (n_estimators)", 50, 150, 100, 10)
+
+    elif model_name == "Decision Tree Classifier":
+        st.subheader("Decision Tree Classifier Hyperparameters")
+        params["max_depth"] = st.selectbox("Max Depth", [None, 5, 10])
+
+    return params
+
 def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize_hyperparams=False):
     """Train and evaluate machine learning models."""
     results = pd.DataFrame(columns=['Method', 'Accuracy', 'Precision', 'Recall', 'F1'])
@@ -52,7 +80,23 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
 
     for method, model in models.items():
         if optimize_hyperparams and method in param_grids:
-            grid_search = GridSearchCV(model, param_grids[method], cv=5)
+            # Estimate progress for hyperparameter tuning based on number of combinations
+            total_combinations = 1
+            for key, value in param_grids[method].items():
+                total_combinations *= len(value)
+            
+            progress = st.progress(0)
+            st.write(f"Optimizing hyperparameters for {method}...")
+
+            # Custom scorer that updates the progress bar
+            def custom_scorer(estimator, X, y):
+                score = estimator.score(X, y)
+                current_progress = progress.value + (1.0 / total_combinations)
+                progress.progress(current_progress)
+                sleep(0.1)
+                return score
+
+            grid_search = GridSearchCV(model, param_grids[method], cv=5, scoring=custom_scorer)
             grid_search.fit(X_train, y_train)
             best_model = grid_search.best_estimator_
         else:
