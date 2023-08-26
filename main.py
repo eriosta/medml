@@ -1,10 +1,8 @@
 import streamlit as st
 import os
 import pandas as pd
-from pandas_profiling import ProfileReport
 import subprocess
-
-BASE_DIR = 'workspaces/medml/'
+from pandas_profiling import ProfileReport
 
 def setup_kaggle_env_variables(username, key):
     """Set up environment variables for Kaggle."""
@@ -12,74 +10,107 @@ def setup_kaggle_env_variables(username, key):
     os.environ['KAGGLE_KEY'] = key
 
 def download_kaggle_dataset(dataset_path):
-    """Download and unzip the specified kaggle dataset using Kaggle CLI."""
-    
-    # Use subprocess to execute CLI commands
+    """Download the specified kaggle dataset using Kaggle CLI."""
     download_command = f"kaggle datasets download {dataset_path}"
     download_result = subprocess.run(download_command, shell=True, capture_output=True, text=True)
     
     if download_result.returncode != 0:
         raise ValueError(download_result.stderr)
+    dataset_name = dataset_path.split("/")[-1] + ".zip"
+    return dataset_name
 
-    # Extract dataset name from the dataset path
-    dataset_name = dataset_path.split("/")[-1]
-    unzip_command = f"unzip {dataset_name}.zip"
-    unzip_result = subprocess.run(unzip_command, shell=True, capture_output=True, text=True)
-    
-    if unzip_result.returncode != 0:
-        raise ValueError(unzip_result.stderr)
-
-    # Return the CSV file name
-    for file in unzip_result.stdout.split("\n"):
-        if file.endswith(".csv"):
-            return file.strip()
+# To display the pandas profile report within streamlit
+def st_profile_report(report):
+    with st.spinner('Rendering report...'):
+        st.components.v1.html(report.to_html(), height=600, width=800)
 
 st.title("Kaggle Dataset Streamlit App")
 
-# Sidebar content
-st.sidebar.header("Kaggle Setup")
-kaggle_username = st.sidebar.text_input("Kaggle Username")
-kaggle_key = st.sidebar.text_input("Kaggle Key", type="password")
+# Check if 'df' is already in the session state
+if 'df' not in st.session_state:
+    st.session_state.df = None
 
-if kaggle_username and kaggle_key:
-    try:
-        setup_kaggle_env_variables(kaggle_username, kaggle_key)
-        st.sidebar.success("Kaggle setup complete!")
-    except Exception as e:
-        st.sidebar.error(f"Error: {e}")
+# Navigation
+nav = st.sidebar.radio("Navigation", ["Dataset Setup", "EDA Report"])
 
-existing_datasets = ["jillanisofttech/brain-stroke-dataset"]
-dataset_choice = st.sidebar.selectbox("Choose a Kaggle Dataset", ["Custom Dataset"] + existing_datasets)
-if dataset_choice == "Custom Dataset":
-    dataset_path = st.sidebar.text_input("Enter Kaggle Dataset Path")
-else:
-    dataset_path = dataset_choice
+if nav == "Dataset Setup":
+    data_source = st.sidebar.radio("Choose your data source", ["Kaggle Dataset", "Upload your CSV"])
 
-csv_filename = None  # Initialize CSV file name to None
+    if data_source == "Kaggle Dataset":
+        kaggle_username = st.sidebar.text_input("Kaggle Username")
+        kaggle_key = st.sidebar.text_input("Kaggle Key", type="password")
 
-if dataset_path:
-    try:
-        csv_filename = download_kaggle_dataset(dataset_path)
-        st.sidebar.success(f"{dataset_path} downloaded and extracted!")
-    except Exception as e:
-        st.sidebar.error(f"Error: {e}")
+        if kaggle_username and kaggle_key:
+            try:
+                setup_kaggle_env_variables(kaggle_username, kaggle_key)
+                st.sidebar.success("Kaggle setup complete!")
+            except Exception as e:
+                st.sidebar.error(f"Error: {e}")
 
-# Main content
-if csv_filename and st.sidebar.button("Generate EDA Report"):
-    # Join the base directory with the csv filename to get the full path
-    full_csv_path = os.path.join(BASE_DIR, csv_filename)
-    
-    df = pd.read_csv(full_csv_path)
+        existing_datasets = ["jillanisofttech/brain-stroke-dataset"]
+        dataset_choice = st.sidebar.selectbox("Choose a Kaggle Dataset", ["Custom Dataset"] + existing_datasets)
+        dataset_path = dataset_choice if dataset_choice != "Custom Dataset" else st.sidebar.text_input("Enter Kaggle Dataset Path")
 
-    # Display the head of the DataFrame to ensure it's read correctly
-    st.write(df.head())
+        if dataset_path:
+            try:
+                zip_name = download_kaggle_dataset(dataset_path)
+                zip_path = os.path.join(zip_name)
+                st.sidebar.success(f"{dataset_path} downloaded!")
 
-    # Generate the EDA report
-    profile = ProfileReport(df, title="Automated EDA Report", explorative=True)
-    report_path = os.path.join(BASE_DIR, "eda_report.html")  # Full path for EDA report as well
-    profile.to_file(report_path)
+                with open(zip_path, 'rb') as f:
+                    bytes_data = f.read()
+                st.sidebar.download_button(
+                    label="Download Dataset Zip",
+                    data=bytes_data,
+                    file_name=f"{dataset_choice}.zip",
+                    mime="application/zip"
+                )
+            except Exception as e:
+                st.sidebar.error(f"Error: {e}")
 
-    # Use st.components to display the EDA report
-    with open(report_path, 'r') as f:
-        html_string = f.read()
-    st.components.v1.html(html_string, width=800, height=600, scrolling=True)
+    else:
+        uploaded_file = st.sidebar.file_uploader("Upload your CSV file", type="csv")
+        if uploaded_file:
+            st.sidebar.success("CSV file uploaded!")
+            st.session_state.df = pd.read_csv(uploaded_file)
+            st.write(st.session_state.df.head())
+
+elif nav == "EDA Report":
+    if st.session_state.df is not None:
+        try:
+            st.write("Generating EDA report...")
+            
+            # Create a progress bar
+            progress_bar = st.progress(0)
+
+            # Update progress bar: start (You can update this with any logic)
+            progress_bar.progress(25)
+
+            profile = ProfileReport(st.session_state.df, title="Automated EDA Report", explorative=True)
+
+            # Update progress bar: mid-way
+            progress_bar.progress(50)
+
+            st_profile_report(profile)
+
+            # Update progress bar: almost done
+            progress_bar.progress(75)
+
+            # Allow user to download the report
+            profile.to_file("eda_report.html")
+            with open("eda_report.html", "rb") as f:
+                report_data = f.read()
+            st.sidebar.download_button(
+                label="Download EDA Report",
+                data=report_data,
+                file_name="eda_report.html",
+                mime="text/html"
+            )
+
+            # Update progress bar: complete
+            progress_bar.progress(100)
+
+        except Exception as e:
+            st.error(f"Error generating report: {e}")
+    else:
+        st.warning("Please upload a dataset first under 'Dataset Setup'.")
