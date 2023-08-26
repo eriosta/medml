@@ -23,7 +23,8 @@ nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data An
 
 if nav == "Get Started":
     st.markdown("""
-    # Welcome to MEDML! A No-Code AI Platform For Clinicians.
+    # Welcome to MEDML! 
+    ### A No-Code AI Platform For Clinicians.
 
     Whether you're a tech guru or a complete beginner, MEDML is designed with you in mind. We're breaking barriers, ensuring that everyone, regardless of their background in tech, AI, or data, can harness the power of machine learning in medicine.
 
