@@ -23,52 +23,42 @@ nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data An
 
 if nav == "Get Started":
     st.text("""
-    🚀 **Welcome to MEDML!**
-    A 'No One Left Behind' Platform.
-    """)
+    🚀 **Welcome to MEDML - A No-Code AI Platform For Clinicians**
 
-    st.header("👨‍⚕️ Regardless of Your Background, MEDML is for YOU!")
-    st.text("""
-    Whether you're a tech enthusiast or an absolute beginner, MEDML ensures everyone can harness the power of machine learning in medicine.
-    """)
+    Whether you're a tech guru or a complete beginner, MEDML is designed with you in mind. We're breaking barriers, ensuring that everyone, regardless of their background in tech, AI, or data, can harness the power of machine learning in medicine.
 
-    st.header("🚶‍♂️ Getting Started:")
-    st.subheader("1. Choose Your Data Source 📊")
-    st.text("""
-    - **Kaggle:** 
-    * Kaggle is a community-driven platform for data enthusiasts.
-    * If you're new:
-        - Sign up on [Kaggle](https://www.kaggle.com/).
-        - Go to 'Account' under your profile picture.
-        - In the `API` section, click `Create New API Token`.
-        - Find "username" and "key" in the downloaded file.
-        - Input these credentials into our app.
-    - **Upload CSV:** 
-    * Have your own dataset?
-    * Ensure it's in a CSV format.
-    * Use the 'Upload CSV' feature.
-    """)
+    ### Step 1: Choose Your Data Source 📊
 
-    st.subheader("2. Dive into Data Exploration 🔍")
-    st.text("""
-    Once your data is loaded:
-    - Switch to the 'Exploratory Data Analysis' tab.
-    - Get a quick summary and visual insights to understand your data better.
-    """)
+    **Kaggle:** 
+    - Kaggle is a community-driven platform for sharing datasets.
+    - Sign up on [Kaggle](https://www.kaggle.com/) if you haven't.
+    - Navigate to your profile picture on the top right -> 'Account'. Under the `API` section, click on `Create New API Token`. This will download a credential file.
+    - Open this file to find "username" and "key". Enter these into our app.
+    
+    **Upload CSV:** 
+    - Got your data? Perfect!
+    - Make sure it's saved as a CSV file.
+    - Use our 'Upload CSV' feature and see your data come alive!
 
-    st.subheader("3. Begin Predictions with Confidence 🧠")
-    st.text("""
-    No need to get bogged down by technicalities, let MEDML guide you:
-    - **Choose your target**: Identify the outcome you're focusing on.
-    - **Select input variables**: These are factors that may influence the outcome.
-    - **Choose a model**: Unsure about the technical names? No worries! Just select any and we'll handle the details.
-    - **Optimize Hyperparameters**: A technical term meaning "enhance predictions." Activate it if you want the best results.
-    """)
+    ### Step 2: Get to Know Your Data 🔍
 
-    st.text("""
+    After loading, head over to the 'Exploratory Data Analysis' tab. Here, you can:
+    - View a quick summary of your dataset.
+    - Understand your data better through visual insights.
+
+    ### Step 3: Predict with Confidence 🧠
+
+    Let MEDML handle the complexities:
+    - **Select your target**: Tell us what outcome you're interested in.
+    - **Input variables**: Highlight the factors that might influence the outcome.
+    - **Pick your predictor**: Don't fret over the names or how they work; just choose one or more and we handle the rest.
+    - **Optimize Hyperparameters?**: A fancy term that simply means "Make my predictions even better." Turn it on for optimized results.
+
+    Hit 'Train Models' and you'll soon have insights at your fingertips.
+
     ---
 
-    **A Gentle Reminder:** MEDML complements your expertise; it doesn't substitute it. Trust your professional judgment always. We're here to ensure everyone has a seat at the AI table. Need assistance? We're always here to help!
+    Always keep in mind: MEDML is a tool to aid your expertise, not replace it. Your medical judgment is paramount. And remember, we've designed this to ensure that no one is left behind in the AI revolution. Need help? We've got your back!
     """)
 
     st.markdown("Now, navigate using the sidebar and embark on your data journey! 🎉")
