@@ -15,17 +15,21 @@ from xgboost import XGBClassifier
 from sklearn.tree import DecisionTreeClassifier  # Import the classifier
 from time import sleep
 
-def prepare_data(df, VAR, categorical_features):
-    """Prepare the dataset for modeling."""
-    X = df.drop(VAR, axis=1)  # Features
-    y = df[VAR]  # Target
+def prepare_data(df, target_var, training_vars, categorical_vars, test_size=0.2):
+    # Extract features and target from dataframe
+    X = df[training_vars]
+    y = df[target_var]
 
-    # One-hot encode categorical features
-    X_encoded = pd.get_dummies(X, columns=categorical_features, drop_first=True)
+    # Encode categorical variables (if there are any)
+    if categorical_vars:
+        X = pd.get_dummies(X, columns=categorical_vars, drop_first=True)
 
-    # Split data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.2, random_state=42)
+    # Split data into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+
     return X_train, X_test, y_train, y_test
+
+
 
 def get_model_hyperparameters(model_name):
     """Retrieve user-defined hyperparameters for a given model."""
@@ -33,23 +37,39 @@ def get_model_hyperparameters(model_name):
 
     if model_name == "Logistic Regression":
         st.subheader("Logistic Regression Hyperparameters")
-        params["C"] = st.slider("Regularization strength (C)", 0.001, 100.0, 1.0, 0.001)
-        params["max_iter"] = st.slider("Maximum Iterations", 1000, 20000, 10000, 1000)
-        params["class_weight"] = st.selectbox("Class Weight", [None, "balanced"])
+        
+        st.write("Regularization strength (C): Inverse of regularization strength. Smaller values specify stronger regularization.")
+        params["C"] = st.slider("C", 0.001, 100.0, 1.0, 0.001)
+        
+        st.write("Maximum Iterations: Maximum number of iterations for the solver to converge.")
+        params["max_iter"] = st.slider("Max Iterations", 1000, 20000, 10000, 1000)
+        
+        st.write("Class Weight: Weights associated with classes. Useful for imbalanced datasets.")
+        params["class_weight"] = st.selectbox("Class Weight", [None, "balanced"], key=f"{model_name}_class_weight")
         
     elif model_name == "Random Forest Classifier":
         st.subheader("Random Forest Classifier Hyperparameters")
+        
+        st.write("Number of Trees (n_estimators): The number of trees in the forest.")
         params["n_estimators"] = st.slider("Number of Trees (n_estimators)", 50, 150, 100, 10)
-        params["max_depth"] = st.selectbox("Max Depth", [None, 5, 10])
+        
+        st.write("Max Depth: The maximum depth of the tree.")
+        params["max_depth"] = st.selectbox("Max Depth", [None, 5, 10], key=f"{model_name}_max_depth")
 
     elif model_name == "Gradient Boosting Classifier":
         st.subheader("Gradient Boosting Classifier Hyperparameters")
+        
+        st.write("Learning Rate: Shrinks the contribution of each tree. There's a trade-off between learning rate and number of boosting rounds.")
         params["learning_rate"] = st.slider("Learning Rate", 0.01, 0.1, 0.05, 0.01)
+        
+        st.write("Number of Boosting Rounds (n_estimators): The number of boosting stages to run.")
         params["n_estimators"] = st.slider("Number of Boosting Rounds (n_estimators)", 50, 150, 100, 10)
 
     elif model_name == "Decision Tree Classifier":
         st.subheader("Decision Tree Classifier Hyperparameters")
-        params["max_depth"] = st.selectbox("Max Depth", [None, 5, 10])
+        
+        st.write("Max Depth: The maximum depth of the tree.")
+        params["max_depth"] = st.selectbox("Max Depth", [None, 5, 10], key=f"{model_name}_max_depth")
 
     return params
 

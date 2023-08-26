@@ -72,10 +72,26 @@ elif nav == "EDA Report":
 
 elif nav == "Model Training":
     if st.session_state.df is not None:
+        # Select the target variable
         VAR = st.selectbox("Select Target Variable", st.session_state.df.columns)
-        categorical_features = st.multiselect("Select Categorical Variables", st.session_state.df.columns)
-        
-        X_train, X_test, y_train, y_test = prepare_data(st.session_state.df, VAR, categorical_features)
+
+        # Select the training variables
+        training_vars = st.multiselect("Select Variables for Training (excluding target)", 
+                                       st.session_state.df.columns.difference([VAR]))
+
+        # From the selected training variables, select the categorical ones for encoding
+        categorical_features = st.multiselect("Select Categorical Variables to Encode", training_vars)
+
+        # Create two columns to display train and test percentages side by side
+        col1, col2 = st.columns(2)
+
+        # Slider for test set size
+        test_size = col1.slider('Select Test Set Size (in percentage)', min_value=5, max_value=50, value=20) / 100
+
+        # Display the train set size in the next column
+        col2.write(f"Train Set Size: {(1 - test_size) * 100:.0f}%")
+
+        X_train, X_test, y_train, y_test = prepare_data(st.session_state.df, VAR, training_vars, categorical_features, test_size)
         
         model_selection = st.multiselect("Select Models", ["Logistic Regression", "Random Forest Classifier", "Gradient Boosting Classifier", "Decision Tree Classifier"])
         
