@@ -22,36 +22,53 @@ else:
 nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data Analysis", "Models"])
 
 if nav == "Get Started":
-    st.header("Get Started with MEDML 🚀")
-
-    st.subheader("Step 1: Load Your Data")
-    st.write("""
-    Choose one of the methods:
-    - **From Kaggle (Optional)**: 
-        1. Enter your Kaggle credentials.
-        2. Select a dataset from the provided list or specify the path of another.
-    - **From Local Drive**: 
-        1. Simply drag and drop your CSV file.
+    st.text("""
+    🚀 **Welcome to MEDML!**
+    A 'No One Left Behind' Platform.
     """)
 
-    st.subheader("Step 2: Dive into Exploratory Data Analysis (EDA)")
-    st.write("""
-    1. Navigate to the 'Exploratory Data Analysis' tab.
-    2. Explore the generated insights and visualizations of your data.
+    st.header("👨‍⚕️ Regardless of Your Background, MEDML is for YOU!")
+    st.text("""
+    Whether you're a tech enthusiast or an absolute beginner, MEDML ensures everyone can harness the power of machine learning in medicine.
     """)
 
-    st.subheader("Step 3: Train Your Model")
-    st.write("""
-    - **Setup**:
-        1. Select your target variable.
-        2. Choose the training variables.
-    - **Customization (Optional)**:
-        1. Pick from a range of models.
-        2. Define the train-test split.
-        3. Toggle 'Optimize Hyperparameters' if you want to experiment and potentially enhance performance. 
-    - **Execution**:
-        1. Click 'Train Models'.
-        2. View the results and performance metrics.
+    st.header("🚶‍♂️ Getting Started:")
+    st.subheader("1. Choose Your Data Source 📊")
+    st.text("""
+    - **Kaggle:** 
+    * Kaggle is a community-driven platform for data enthusiasts.
+    * If you're new:
+        - Sign up on [Kaggle](https://www.kaggle.com/).
+        - Go to 'Account' under your profile picture.
+        - In the `API` section, click `Create New API Token`.
+        - Find "username" and "key" in the downloaded file.
+        - Input these credentials into our app.
+    - **Upload CSV:** 
+    * Have your own dataset?
+    * Ensure it's in a CSV format.
+    * Use the 'Upload CSV' feature.
+    """)
+
+    st.subheader("2. Dive into Data Exploration 🔍")
+    st.text("""
+    Once your data is loaded:
+    - Switch to the 'Exploratory Data Analysis' tab.
+    - Get a quick summary and visual insights to understand your data better.
+    """)
+
+    st.subheader("3. Begin Predictions with Confidence 🧠")
+    st.text("""
+    No need to get bogged down by technicalities, let MEDML guide you:
+    - **Choose your target**: Identify the outcome you're focusing on.
+    - **Select input variables**: These are factors that may influence the outcome.
+    - **Choose a model**: Unsure about the technical names? No worries! Just select any and we'll handle the details.
+    - **Optimize Hyperparameters**: A technical term meaning "enhance predictions." Activate it if you want the best results.
+    """)
+
+    st.text("""
+    ---
+
+    **A Gentle Reminder:** MEDML complements your expertise; it doesn't substitute it. Trust your professional judgment always. We're here to ensure everyone has a seat at the AI table. Need assistance? We're always here to help!
     """)
 
     st.markdown("Now, navigate using the sidebar and embark on your data journey! 🎉")
