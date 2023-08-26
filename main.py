@@ -6,17 +6,25 @@ import pandas as pd
 import os
 from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
 
-st.title("Kaggle Dataset Streamlit App")
+st.title("MEDML")
 
+# Initialize dataset and dataset name in session state
 if 'df' not in st.session_state:
     st.session_state.df = None
+    st.session_state.dataset_name = None  # Add a state to store the dataset name
 
-nav = st.sidebar.radio("Navigation", ["Dataset Setup", "EDA Report", "Model Training"])
+# Display the currently loaded dataset information on the sidebar
+if st.session_state.dataset_name:
+    st.sidebar.markdown(f"📊 **Loaded Dataset:** {st.session_state.dataset_name}")
+else:
+    st.sidebar.info("No dataset currently loaded")
 
-if nav == "Dataset Setup":
-    data_source = st.sidebar.radio("Choose your data source", ["Kaggle Dataset", "Upload your CSV"])
+nav = st.sidebar.radio("Navigation", ["Data", "Exploratory Data Analysis", "Models"])
 
-    if data_source == "Kaggle Dataset":
+if nav == "Data":
+    data_source = st.sidebar.radio("Choose Data Source", ["Kaggle", "Upload CSV"])
+
+    if data_source == "Kaggle":
         kaggle_username = st.sidebar.text_input("Kaggle Username")
         kaggle_key = st.sidebar.text_input("Kaggle Key", type="password")
 
@@ -27,15 +35,24 @@ if nav == "Dataset Setup":
             except Exception as e:
                 st.sidebar.error(f"Error: {e}")
 
-        existing_datasets = ["jillanisofttech/brain-stroke-dataset"]
-        dataset_choice = st.sidebar.selectbox("Choose a Kaggle Dataset", ["Custom Dataset"] + existing_datasets)
-        dataset_path = dataset_choice if dataset_choice != "Custom Dataset" else st.sidebar.text_input("Enter Kaggle Dataset Path")
+        existing_datasets = [
+            "jillanisofttech/brain-stroke-dataset",
+            "akshaydattatraykhare/diabetes-dataset",
+            "fedesoriano/heart-failure-prediction",
+            "mathurinache/sepsis-survival-minimal-clinical-records",
+            "mirichoi0218/insurance",
+            "protobioengineering/mit-bih-arrhythmia-database-modern-2023"
+        ]
+
+        dataset_choice = st.sidebar.selectbox("Choose a Kaggle Dataset", ["Other Kaggle Dataset"] + existing_datasets)
+        dataset_path = dataset_choice if dataset_choice != "Other Kaggle Dataset" else st.sidebar.text_input("Enter Kaggle Dataset Path")
 
         if dataset_path:
             try:
                 zip_name = download_kaggle_dataset(dataset_path)
                 zip_path = os.path.join(zip_name)
                 st.sidebar.success(f"{dataset_path} downloaded!")
+                st.session_state.dataset_name = dataset_path.split("/")[-1]  # store dataset name to session state
 
                 with open(zip_path, 'rb') as f:
                     bytes_data = f.read()
@@ -53,24 +70,26 @@ if nav == "Dataset Setup":
         if uploaded_file:
             st.sidebar.success("CSV file uploaded!")
             st.session_state.df = pd.read_csv(uploaded_file)
+            st.session_state.dataset_name = uploaded_file.name  # store actual filename to session state
             st.write(st.session_state.df.head())
 
-elif nav == "EDA Report":
+
+elif nav == "Exploratory Data Analysis":
     if st.session_state.df is not None:
         try:
             report_data = generate_eda(st.session_state.df)
             st.sidebar.download_button(
                 label="Download EDA Report",
                 data=report_data,
-                file_name="eda_report.html",
+                file_name="EDA.html",
                 mime="text/html"
             )
         except Exception as e:
             st.error(f"Error generating report: {e}")
     else:
-        st.warning("Please upload a dataset first under 'Dataset Setup'.")
+        st.warning("Please upload a dataset first under 'Data'.")
 
-elif nav == "Model Training":
+elif nav == "Models":
     if st.session_state.df is not None:
         # Select the target variable
         VAR = st.selectbox("Select Target Variable", st.session_state.df.columns)
