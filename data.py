@@ -51,4 +51,5 @@ def display_metadata(existing_datasets):
     })
 
     # Display the table
+    st.header("Kaggle Datasets")
     st.table(df_datasets)

@@ -61,6 +61,17 @@ elif nav == "Data":
     data_source = st.sidebar.radio("Choose Data Source", ["Kaggle", "Upload CSV"])
 
     if data_source == "Kaggle":
+
+        st.info("""
+    ## How to get your Kaggle credentials
+    1. Log in to [Kaggle](https://www.kaggle.com/).
+    2. Go to your Account page (click on your profile picture on the top-right).
+    3. Scroll down to the `API` section.
+    4. Click on “Create New API Token”.
+    5. This will download a file named `kaggle.json`.
+    6. Open the file and you'll find your `username` and `key`.
+    """)
+            
         kaggle_username = st.sidebar.text_input("Kaggle Username")
         kaggle_key = st.sidebar.text_input("Kaggle Key", type="password")
 
@@ -125,7 +136,7 @@ elif nav == "Exploratory Data Analysis":
         except Exception as e:
             st.error(f"Error generating report: {e}")
     else:
-        st.warning("Please upload a dataset first under 'Data'.")
+        st.warning("Please upload a dataset first under Data.")
 
 elif nav == "Models":
     if st.session_state.df is not None:
