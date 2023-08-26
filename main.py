@@ -55,8 +55,6 @@ if nav == "Get Started":
     - **Pick your predictor**: Don't fret over the names or how they work; just choose one or more and we handle the rest.
     - **Optimize Hyperparameters?**: A fancy term that simply means "Make my predictions even better." Turn it on for optimized results.
 
-    Hit 'Train Models' and you'll soon have insights at your fingertips.
-
     ---
 
     Always keep in mind: MEDML is a tool to aid your expertise, not replace it. Your medical judgment is paramount. Need help? Reach out to us [here]().
