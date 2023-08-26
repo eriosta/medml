@@ -59,7 +59,7 @@ if nav == "Get Started":
 
     ---
 
-    Always keep in mind: MEDML is a tool to aid your expertise, not replace it. Your medical judgment is paramount. And remember, we've designed this to ensure that no one is left behind in the AI revolution. Need help? We've got your back!
+    Always keep in mind: MEDML is a tool to aid your expertise, not replace it. Your medical judgment is paramount. Need help? Reach out to us [here]().
     """)
 
     st.markdown("Now, navigate using the sidebar and embark on your data journey! 🎉")
