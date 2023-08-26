@@ -3,3 +3,4 @@ shap
 streamlit
 kaggle
 xgboost
+streamlit-toggle-switch
