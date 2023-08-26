@@ -29,8 +29,6 @@ def prepare_data(df, target_var, training_vars, categorical_vars, test_size=0.2)
 
     return X_train, X_test, y_train, y_test
 
-
-
 def get_model_hyperparameters(model_name):
     """Retrieve user-defined hyperparameters for a given model."""
     params = {}

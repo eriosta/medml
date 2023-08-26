@@ -129,6 +129,11 @@ elif nav == "Exploratory Data Analysis":
 
 elif nav == "Models":
     if st.session_state.df is not None:
+        
+        # Create a checkbox to decide whether to display the data head or not
+        if st.checkbox("View data? (Head Only)"):
+            st.dataframe(st.session_state.df.head())
+
         # Select the target variable
         VAR = st.selectbox("Select Target Variable", st.session_state.df.columns)
 
@@ -143,7 +148,7 @@ elif nav == "Models":
         col1, col2 = st.columns(2)
 
         # Slider for test set size
-        test_size = col1.slider('Select Test Set Size (in percentage)', min_value=5, max_value=50, value=20) / 100
+        test_size = col1.slider('Select Test Set Size (%)', min_value=5, max_value=50, value=20) / 100
 
         # Display the train set size in the next column
         col2.write(f"Train Set Size: {(1 - test_size) * 100:.0f}%")
@@ -160,6 +165,7 @@ elif nav == "Models":
                                                     inactive_color='#D3D3D3', 
                                                     active_color="#11567f", 
                                                     track_color="#29B5E8")
+
 
         selected_models = {}
         all_models = {
@@ -185,4 +191,4 @@ elif nav == "Models":
 
             plot_evaluation_metrics(selected_models, X_test, y_test)
     else:
-        st.warning("Please upload a dataset first under 'Dataset Setup'.")
+        st.warning("Please upload a dataset first under Data.")
