@@ -1,2 +1,5 @@
 pandas-profiling
 shap
+streamlit
+kaggle
+xgboost

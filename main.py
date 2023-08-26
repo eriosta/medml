@@ -3,13 +3,14 @@ from data import setup_kaggle_env_variables, download_kaggle_dataset
 from eda import generate_eda
 import pandas as pd
 import os
+from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
 
 st.title("Kaggle Dataset Streamlit App")
 
 if 'df' not in st.session_state:
     st.session_state.df = None
 
-nav = st.sidebar.radio("Navigation", ["Dataset Setup", "EDA Report"])
+nav = st.sidebar.radio("Navigation", ["Dataset Setup", "EDA Report", "Model Training"])
 
 if nav == "Dataset Setup":
     data_source = st.sidebar.radio("Choose your data source", ["Kaggle Dataset", "Upload your CSV"])
@@ -65,5 +66,36 @@ elif nav == "EDA Report":
             )
         except Exception as e:
             st.error(f"Error generating report: {e}")
+    else:
+        st.warning("Please upload a dataset first under 'Dataset Setup'.")
+
+elif nav == "Model Training":
+    if st.session_state.df is not None:
+        VAR = st.selectbox("Select Target Variable", st.session_state.df.columns)
+        categorical_features = st.multiselect("Select Categorical Variables", st.session_state.df.columns)
+        
+        X_train, X_test, y_train, y_test = prepare_data(st.session_state.df, VAR, categorical_features)
+        
+        model_selection = st.multiselect("Select Models", ["Logistic Regression", "Random Forest Classifier", "Gradient Boosting Classifier", "Decision Tree Classifier"])
+        
+        # Choice for Hyperparameter Optimization
+        optimize_hyperparams = st.checkbox('Optimize Hyperparameters?')
+
+        selected_models = {}
+        all_models = {
+            'Logistic Regression': LogisticRegression(max_iter=10000, class_weight='balanced'),
+            'Random Forest Classifier': RandomForestClassifier(),
+            'Gradient Boosting Classifier': XGBClassifier(use_label_encoder=False, eval_metric='logloss'),
+            'Decision Tree Classifier': DecisionTreeClassifier()
+        }
+
+        for model in model_selection:
+            selected_models[model] = all_models[model]
+
+        if st.button("Train Models"):
+            results = train_and_evaluate_models(X_train, y_train, X_test, y_test, selected_models, optimize_hyperparams)
+            st.write(results)
+
+            plot_evaluation_metrics(selected_models, X_test, y_test)
     else:
         st.warning("Please upload a dataset first under 'Dataset Setup'.")
