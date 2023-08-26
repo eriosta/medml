@@ -1,4 +1,5 @@
 import pandas as pd
+import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -74,11 +75,18 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
 
 def plot_evaluation_metrics(models, X_test, y_test):
     """Plot confusion matrices and ROC-AUC curves."""
-    fig, axs = plt.subplots(len(models), 2, figsize=(12, 5 * len(models)))
-
+    num_models = len(models)
+    
+    if num_models == 1:
+        fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+        axs = np.array([axs])
+    else:
+        fig, axs = plt.subplots(num_models, 2, figsize=(12, 5 * num_models))
+    
     for idx, (method, model) in enumerate(models.items()):
         cm = confusion_matrix(y_test, model.predict(X_test))
         cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        
         ConfusionMatrixDisplay(confusion_matrix=cm_normalized, display_labels=['No Stroke', 'Stroke']).plot(ax=axs[idx, 0], cmap='Blues', values_format=".2f")
 
         y_prob = model.predict_proba(X_test)[:, 1]
@@ -86,7 +94,6 @@ def plot_evaluation_metrics(models, X_test, y_test):
         roc_disp = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_score(y_test, y_prob), estimator_name=method)
         roc_disp.plot(ax=axs[idx, 1])
 
-        axs[idx, 0].set_title(f'Normalized Confusion Matrix: {method}')
         axs[idx, 1].set_title(f'ROC Curve: {method}')
         axs[idx, 1].plot([0, 1], [0, 1], color='navy', linestyle='--')
         axs[idx, 1].set_xlim([0.0, 1.0])
@@ -95,4 +102,6 @@ def plot_evaluation_metrics(models, X_test, y_test):
         axs[idx, 1].set_xlabel('False Positive Rate')
 
     plt.tight_layout()
-    plt.show()
+    st.pyplot(fig)  # Replace plt.show() with this line
+
+
