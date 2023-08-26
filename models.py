@@ -1,6 +1,4 @@
 import pandas as pd
-from time import sleep
-
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,7 +13,7 @@ from sklearn.model_selection import GridSearchCV
 import xgboost as xgb
 from xgboost import XGBClassifier
 from sklearn.tree import DecisionTreeClassifier  # Import the classifier
-
+from time import sleep
 
 def prepare_data(df, VAR, categorical_features):
     """Prepare the dataset for modeling."""
@@ -55,6 +53,8 @@ def get_model_hyperparameters(model_name):
 
     return params
 
+from time import sleep
+
 def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize_hyperparams=False):
     """Train and evaluate machine learning models."""
     results = pd.DataFrame(columns=['Method', 'Accuracy', 'Precision', 'Recall', 'F1'])
@@ -78,25 +78,14 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
         }
     }
 
+    total_models = len(models)
+    progress = st.progress(0)
+    model_count = 0
+
     for method, model in models.items():
         if optimize_hyperparams and method in param_grids:
-            # Estimate progress for hyperparameter tuning based on number of combinations
-            total_combinations = 1
-            for key, value in param_grids[method].items():
-                total_combinations *= len(value)
-            
-            progress = st.progress(0)
             st.write(f"Optimizing hyperparameters for {method}...")
-
-            # Custom scorer that updates the progress bar
-            def custom_scorer(estimator, X, y):
-                score = estimator.score(X, y)
-                current_progress = progress.value + (1.0 / total_combinations)
-                progress.progress(current_progress)
-                sleep(0.1)
-                return score
-
-            grid_search = GridSearchCV(model, param_grids[method], cv=5, scoring=custom_scorer)
+            grid_search = GridSearchCV(model, param_grids[method], cv=5)
             grid_search.fit(X_train, y_train)
             best_model = grid_search.best_estimator_
         else:
@@ -114,6 +103,10 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
 
         new_row = {'Method': method, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1': f1}
         results.loc[len(results)] = new_row
+
+        model_count += 1
+        progress.progress(model_count / total_models)
+        sleep(0.1)
 
     return results
 
