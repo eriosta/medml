@@ -21,11 +21,7 @@ if st.session_state.dataset_name:
 else:
     st.sidebar.info("No dataset currently loaded")
 
-nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data Analysis", "Models", "Learn"])
-
-# Emable chat
-if st.checkbox("Enable Llama2 Chatbot"):
-    llama2()
+nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data Analysis", "Models", "Learn","Chatbot"])
 
 if nav == "Get Started":
     st.markdown("""
@@ -215,3 +211,6 @@ elif nav == "Models":
 
 if nav == "Learn":
     show()
+
+if nav == "Chatbot":
+    llama2()
