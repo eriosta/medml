@@ -61,8 +61,8 @@ def display_metadata(existing_datasets):
             st.write("**Task:**", row["Task"])
 
 def data_run():
-    
-    data_source = st.sidebar.radio("Choose Data Source", ["Kaggle", "Upload CSV"])
+
+    data_source = st.sidebar.radio("Choose Data Source", ["Kaggle", "Upload Your Own File"])
 
     if data_source == "Kaggle":
 
@@ -122,7 +122,7 @@ def data_run():
     else:
 
         # Allow both CSV and Excel file types
-        uploaded_file = st.sidebar.file_uploader("Upload your CSV or Excel file", type=["csv", "xlsx"])
+        uploaded_file = st.sidebar.file_uploader("Upload CSV or Excel file", type=["csv", "xlsx"])
 
         if uploaded_file:
             if uploaded_file.name.endswith(".csv"):
