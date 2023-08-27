@@ -4,7 +4,7 @@ import pandas as pd
 
 def show():
 
-    selection - st.sidebar.radio("Go to", ["Which Model Do I Use?","Models 101"])
+    selection = st.sidebar.radio("Go to", ["Which Model Do I Use?","Models 101"])
 
     if selection == "Which Model Do I Use?":
         # Title
