@@ -205,7 +205,7 @@ elif nav == "Models":
             results = train_and_evaluate_models(X_train, y_train, X_test, y_test, selected_models, optimize_hyperparams)
             st.write(results)
 
-            plot_evaluation_metrics(selected_models, X_test, y_test)
+            plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
     else:
         st.warning("Please upload a dataset first under Data.")
 
