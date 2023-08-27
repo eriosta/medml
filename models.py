@@ -156,7 +156,7 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
         progress.progress(model_count / total_models)
         sleep(0.1)
 
-    perform_shap_analysis(models, X_train, X_test, y_test, results,is_shap=is_shap)
+    # perform_shap_analysis(models, X_train, X_test, y_test, results,is_shap=is_shap)
 
     return results, models
 
