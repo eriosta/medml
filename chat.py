@@ -102,74 +102,47 @@ def llama2():
         st.session_state.messages.append(message)
 
 def pandas_ai():
-    st.title("PandasAI Chatbot")
-    st.sidebar.write("A demo interface for [PandasAI](https://github.com/gventuri/pandas-ai)")
+    st.title("pandas-ai streamlit interface")
 
-    # OpenAI API Key
+    st.write("A demo interface for [PandasAI](https://github.com/gventuri/pandas-ai)")
+    st.write(
+        "Looking for an example *.csv-file?, check [here](https://gist.github.com/netj/8836201)."
+    )
+
     if "openai_key" not in st.session_state:
-        with st.sidebar.form("API key"):
+        with st.form("API key"):
             key = st.text_input("OpenAI Key", value="", type="password")
             if st.form_submit_button("Submit"):
                 st.session_state.openai_key = key
                 st.session_state.prompt_history = []
                 st.session_state.df = None
 
-    # Uploading the CSV file
     if "openai_key" in st.session_state:
         if st.session_state.df is None:
-            uploaded_file = st.sidebar.file_uploader(
-                "Choose a CSV file. This should be in long format (one datapoint per row).",
-                type="csv",
-            )
-            if uploaded_file is not None:
-                df = pd.read_csv(uploaded_file)
-                st.session_state.df = df
+            st.text("Go to Data to upload your data source.")
 
-        # Display the dataframe if it exists
+        with st.form("Question"):
+            question = st.text_input("Question", value="", type="default")
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                with st.spinner():
+                    llm = OpenAI(api_token=st.session_state.openai_key)
+                    pandas_ai = PandasAI(llm)
+                    x = pandas_ai.run(st.session_state.df, prompt=question)
+
+                    fig = plt.gcf()
+                    if fig.get_axes():
+                        st.pyplot(fig)
+                    st.write(x)
+                    st.session_state.prompt_history.append(question)
+
         if st.session_state.df is not None:
             st.subheader("Current dataframe:")
             st.write(st.session_state.df)
 
-        # Form for the question input
-        with st.sidebar.form("Question"):
-            question = st.text_input("Question", value="", type="default")
-            submitted = st.form_submit_button("Submit")
-            if submitted:
-                with st.chat_message("user"):
-                    st.write(question)
-                with st.spinner():
-                    llm = OpenAI(api_token=st.session_state.openai_key)
-                    pandas_ai_instance = PandasAI(llm)
-                    answer = pandas_ai_instance.run(st.session_state.df, prompt=question)
+        st.subheader("Prompt history:")
+        st.write(st.session_state.prompt_history)
 
-                    with st.chat_message("assistant"):
-                        st.write(answer)
-                        fig = plt.gcf()
-                        if fig.get_axes():
-                            st.pyplot(fig)
-                st.session_state.prompt_history.append(question)
-
-        # Suggested questions buttons in the sidebar
-        for q in suggested_questions:
-            if st.sidebar.button(q):
-                with st.chat_message("user"):
-                    st.write(q)
-                with st.spinner():
-                    llm = OpenAI(api_token=st.session_state.openai_key)
-                    pandas_ai_instance = PandasAI(llm)
-                    answer = pandas_ai_instance.run(st.session_state.df, prompt=q)
-
-                    with st.chat_message("assistant"):
-                        st.write(answer)
-                        fig = plt.gcf()
-                        if fig.get_axes():
-                            st.pyplot(fig)
-                st.session_state.prompt_history.append(q)
-
-        st.sidebar.subheader("Prompt history:")
-        for q in st.session_state.prompt_history:
-            st.sidebar.text(q)
-
-        if st.sidebar.button("Clear"):
-            st.session_state.prompt_history = []
-            st.session_state.df = None
+    if st.button("Clear"):
+        st.session_state.prompt_history = []
+        st.session_state.df = None
