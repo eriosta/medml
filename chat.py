@@ -10,16 +10,10 @@ suggested_questions = [
         "Can you explain the basics of AI and ML and DL?",
         "What are data cleaning best practices?",
         "What is supervised vs unsupervised learning?",
-        "What are some challenges in implementing AI in clinics?",
-        "How do I evaluate the reliability of an AI tool in medicine?",
-        "What is the importance of data quality in medical AI?",
-        "How can AI be integrated into clinical workflows?",
+        "How do I evaluate the reliability of an AI tool?",
         "What are the regulatory considerations for medical AI?",
         "How do I keep up-to-date with the latest AI in healthcare research?",
         "Can you explain overfitting and underfitting?",
-        "How do I ensure fairness and equity when using AI in medical decision-making?",
-        "What is the impact of AI on radiology and pathology?",
-        "How can AI be used in personalized medicine and genomics?"
     ]
 
 def llama2():
