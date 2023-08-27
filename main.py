@@ -6,7 +6,7 @@ import pandas as pd
 import os
 from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
 from learn import show
-from chat import llama2, pandas_ai
+from chat import llama2
 
 st.sidebar.title("MEDML")
 
@@ -150,9 +150,7 @@ if nav == "Learn":
 
 if nav == "Generative AI":
     # Sidebar Navigation
-    navigation = st.sidebar.radio('Navigation', ['Llama2', 'PandasAI'])
+    navigation = st.sidebar.radio('Navigation', ['Llama2'])
 
     if navigation == 'Llama2':
         llama2()
-    elif navigation == 'PandasAI':
-        pandas_ai()
