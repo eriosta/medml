@@ -5,14 +5,11 @@ import random
 
 suggested_questions = [
         "How does this chatbot work?",
-        "How can I get my own API key?",
+        "How can I get my own Replicate API key?",
         "What's the difference between a dataset and a database?",
         "Can you explain the basics of AI and ML and DL?",
         "What are data cleaning best practices?",
         "What is supervised vs unsupervised learning?",
-        "How do I evaluate the reliability of an AI tool?",
-        "What are the regulatory considerations for medical AI?",
-        "How do I keep up-to-date with the latest AI in healthcare research?",
         "Can you explain overfitting and underfitting?",
     ]
 
