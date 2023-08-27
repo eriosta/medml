@@ -62,7 +62,7 @@ def display_metadata(existing_datasets):
 
 def data_run():
 
-    data_source = st.sidebar.radio("Choose Data Source", ["Kaggle", "Upload Your Own File"])
+    data_source = st.sidebar.radio("Choose Data Source", ["Kaggle", "Upload file"])
 
     if data_source == "Kaggle":
 

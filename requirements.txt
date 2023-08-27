@@ -5,3 +5,6 @@ kaggle
 xgboost
 streamlit-toggle-switch
 replicate
+pandasai
+matplotlib
+openai

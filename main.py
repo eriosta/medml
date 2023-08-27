@@ -21,7 +21,7 @@ if st.session_state.dataset_name:
 else:
     st.sidebar.info("No dataset currently loaded")
 
-nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data Analysis", "Models", "Learn","Chatbot"])
+nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data Analysis", "Models", "Learn","Generative AI"])
 
 if nav == "Get Started":
     st.markdown("""
@@ -148,5 +148,11 @@ elif nav == "Models":
 if nav == "Learn":
     show()
 
-if nav == "Chatbot":
-    llama2()
+if nav == "Generative AI":
+    # Sidebar Navigation
+    navigation = st.sidebar.radio('Navigation', ['Llama2', 'PandasAI'])
+
+    if navigation == 'Llama2':
+        llama2()
+    elif navigation == 'PandasAI':
+        pandas_ai()
