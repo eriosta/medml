@@ -163,6 +163,7 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
 def perform_shap_analysis(models, X_train, X_test, y_test):
     """Perform SHAP analysis on the best model."""
     # Compute AUC and add it to the results DataFrame
+    results = pd.DataFrame()
     results['AUC'] = [roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]) for model in models.values()]
 
     best_method = results.loc[results['AUC'].idxmax()]['Method']
