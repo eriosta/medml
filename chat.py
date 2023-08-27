@@ -68,12 +68,6 @@ def llama2():
         "How can AI be used in personalized medicine and genomics?"
     ]
 
-    # Display the suggested questions and populate the chat input when clicked
-    st.sidebar.subheader("Suggested Questions:")
-    for question in suggested_questions:
-        if st.sidebar.button(question):
-            st.session_state.suggested_input = question  # Store the clicked question in the session state
-
     # Check if there's any clicked question to populate the chat input
     suggested_input = random.choice(suggested_questions)
     st.write(f"Suggested question: {suggested_input}")
