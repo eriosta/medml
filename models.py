@@ -14,6 +14,7 @@ import xgboost as xgb
 from xgboost import XGBClassifier
 from sklearn.tree import DecisionTreeClassifier  # Import the classifier
 from time import sleep
+# import pickle
 
 def prepare_data(df, target_var, training_vars, categorical_vars, test_size=0.2):
     # Extract features and target from dataframe
@@ -126,7 +127,7 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
         progress.progress(model_count / total_models)
         sleep(0.1)
 
-    return results
+    return results, models
 
 def plot_evaluation_metrics(models, X_test, y_test, VAR):
     """Plot confusion matrices and ROC-AUC curves."""
@@ -160,3 +161,64 @@ def plot_evaluation_metrics(models, X_test, y_test, VAR):
     st.pyplot(fig)  # Replace plt.show() with this line
 
 
+import shap
+# import pickle
+import streamlit as st
+from sklearn.metrics import roc_auc_score
+
+def run_shap(models, X_train, X_test, y_test):
+    """
+    Computes AUC, saves the best model, and visualizes results including SHAP explanations.
+    
+    Parameters:
+    - models: Dictionary containing trained machine learning models.
+    - X_train: Training data features.
+    - X_test: Testing data features.
+    - y_test: Testing data labels.
+    - X_encoded: Encoded data features (used for SHAP scatter plots).
+
+    Returns: None
+    """
+
+    # Compute AUC and add it to the results DataFrame
+    results = {}
+    results['AUC'] = [roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]) for model in models.values()]
+    
+    best_method = max(results['AUC'], key=results['AUC'].get)
+    st.write(f"Best performing method (based on highest AUC): {best_method}")
+
+    # Save the best model as model.pkl
+    save_model = st.button('Save Best Model')
+    if save_model:
+        best_model = models[best_method]
+        with open('model.pkl', 'wb') as file:
+            pickle.dump(best_model, file)
+        st.write("Model saved successfully!")
+
+    # Ask user if they want to perform SHAP explanations
+    if st.checkbox('Perform SHAP explanations?'):
+        # SHAP
+        best_model = models[best_method]
+        explainer = shap.Explainer(best_model, X_train)
+        shap_values = explainer(X_test)
+        
+        # Visualize SHAP values
+        st.write("SHAP Summary Plot:")
+        shap.summary_plot(shap_values, X_test)
+
+        # Allow user to select which interactions to display
+        available_columns = list(X_train.columns)
+        VARIABLESELECTED = st.selectbox("Choose feature for dependence plot", available_columns)
+        st.write("SHAP Dependence Plot:")
+        shap.dependence_plot(VARIABLESELECTED, shap_values, X_test)
+
+        # Allow user to scatter all interactions
+        if st.checkbox('Show scatter plots for all features using SHAP values?'):
+            for feature in available_columns:
+                st.write(f"Scatter Plot for {feature}:")
+                shap.plots.scatter(shap_values[:, feature], color=shap_values)
+                
+        # Ask if user wants to display force plot
+        if st.checkbox('Display SHAP force plot for a specific observation?'):
+            index = st.number_input('Enter observation index:', min_value=0, max_value=len(X_test)-1, step=1)
+            shap.plots.force(explainer.expected_value[0], shap_values[index], X_test.iloc[index])

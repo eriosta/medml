@@ -4,7 +4,7 @@ from data import data_run
 from eda import generate_eda
 import pandas as pd
 import os
-from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
+from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier, run_shap
 from learn import show
 from chat import llama2
 
@@ -21,7 +21,7 @@ if st.session_state.dataset_name:
 else:
     st.sidebar.info("No dataset currently loaded")
 
-nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data Analysis", "Models", "Learn","Generative AI"])
+nav = st.sidebar.radio("Start Building", ["Get Started","Data", "Exploratory Data Analysis", "Models"])
 
 if nav == "Get Started":
     st.markdown("""
@@ -138,17 +138,22 @@ elif nav == "Models":
                 selected_models[model] = base_model
 
         if st.button("Train Models"):
-            results = train_and_evaluate_models(X_train, y_train, X_test, y_test, selected_models, optimize_hyperparams)
+            results, trained_models = train_and_evaluate_models(X_train, y_train, X_test, y_test, selected_models, optimize_hyperparams)
             st.write(results)
 
             plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
+        
+        run_shap(trained_models, X_train, X_test, y_test, X_encoded)
+
     else:
         st.warning("Please upload a dataset first under Data.")
 
-if nav == "Learn":
+nav2 = st.sidebar.radio("Extra", ["Learn","Generative AI"])
+
+if nav2 == "Learn":
     show()
 
-if nav == "Generative AI":
+if nav2 == "Generative AI":
     # Sidebar Navigation
     navigation = st.sidebar.radio('Navigation', ['Llama2'])
 
