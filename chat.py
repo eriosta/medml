@@ -1,6 +1,7 @@
 import streamlit as st
 import replicate
 import os
+import random
 
 # App title
 # st.set_page_config(page_title="🦙💬 Llama 2 Chatbot")
@@ -74,9 +75,11 @@ def llama2():
             st.session_state.suggested_input = question  # Store the clicked question in the session state
 
     # Check if there's any clicked question to populate the chat input
-    suggested_input = st.session_state.get("suggested_input", "")
+    suggested_input = random.choice(suggested_questions)
+    st.write(f"Suggested question: {suggested_input}")
 
-    if prompt := st.chat_input(value=suggested_input, disabled=not replicate_api):  # Use the suggested input as default value
+    if prompt := st.chat_input(disabled=not replicate_api):
+
         st.session_state.suggested_input = ""  # Clear the stored suggested input after use
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
