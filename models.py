@@ -128,7 +128,7 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
 
     return results
 
-def plot_evaluation_metrics(models, X_test, y_test):
+def plot_evaluation_metrics(models, X_test, y_test, VAR):
     """Plot confusion matrices and ROC-AUC curves."""
     num_models = len(models)
     
@@ -142,7 +142,7 @@ def plot_evaluation_metrics(models, X_test, y_test):
         cm = confusion_matrix(y_test, model.predict(X_test))
         cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
         
-        ConfusionMatrixDisplay(confusion_matrix=cm_normalized, display_labels=['No Stroke', 'Stroke']).plot(ax=axs[idx, 0], cmap='Blues', values_format=".2f")
+        ConfusionMatrixDisplay(confusion_matrix=cm_normalized, display_labels=[f'No {VAR}', VAR]).plot(ax=axs[idx, 0], cmap='Blues', values_format=".2f")
 
         y_prob = model.predict_proba(X_test)[:, 1]
         fpr, tpr, _ = roc_curve(y_test, y_prob)
@@ -155,7 +155,7 @@ def plot_evaluation_metrics(models, X_test, y_test):
         axs[idx, 1].set_ylim([0.0, 1.05])
         axs[idx, 1].set_ylabel('True Positive Rate')
         axs[idx, 1].set_xlabel('False Positive Rate')
-
+    
     plt.tight_layout()
     st.pyplot(fig)  # Replace plt.show() with this line
 
