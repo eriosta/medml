@@ -143,7 +143,7 @@ elif nav == "Models":
 
             plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
         
-        run_shap(trained_models, X_train, X_test, y_test)
+        # run_shap(trained_models, X_train, X_test, y_test)
 
     else:
         st.warning("Please upload a dataset first under Data.")
