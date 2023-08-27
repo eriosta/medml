@@ -119,7 +119,13 @@ def pandas_ai():
 
     if "openai_key" in st.session_state:
         if st.session_state.df is None:
-            st.text("Go to Data to upload your data source.")
+            uploaded_file = st.file_uploader(
+                "Choose a CSV file. This should be in long format (one datapoint per row).",
+                type="csv",
+            )
+            if uploaded_file is not None:
+                df = pd.read_csv(uploaded_file)
+                st.session_state.df = df
 
         with st.form("Question"):
             question = st.text_input("Question", value="", type="default")
@@ -142,6 +148,7 @@ def pandas_ai():
 
         st.subheader("Prompt history:")
         st.write(st.session_state.prompt_history)
+
 
     if st.button("Clear"):
         st.session_state.prompt_history = []
