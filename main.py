@@ -23,44 +23,41 @@ nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data An
 
 if nav == "Get Started":
     st.markdown("""
-    # Welcome to MEDML! 
-    ### A No-Code AI Platform For Clinicians.
+    # Welcome to MEDML!
+    ### A Machine Learning Primer Built By Physicians For Physicians.
 
-    Whether you're a tech guru or a complete beginner, MEDML is designed with you in mind. We're breaking barriers, ensuring that everyone, regardless of their background in tech, AI, or data, can harness the power of machine learning in medicine.
+    MEDML makes machine learning in medicine accessible to all.
 
-    ### Step 1: Choose Your Data Source 📊
+    ### 1. Data Source 📊
 
     **Kaggle:** 
-    - Kaggle is a community-driven platform for sharing datasets.
-    - Sign up on [Kaggle](https://www.kaggle.com/) if you haven't.
-    - Navigate to your profile picture on the top right -> 'Account'. Under the `API` section, click on `Create New API Token`. This will download a credential file.
-    - Open this file to find "username" and "key". Enter these into our app.
+    - Community-driven datasets platform.
+    - New? Sign up on [Kaggle](https://www.kaggle.com/).
+    - For MEDML access: Profile (top right) -> 'Account' -> `API` -> `Create New API Token`. Use "username" and "key" from downloaded file here.
     
     **Upload CSV:** 
-    - Got your data? Perfect!
-    - Make sure it's saved as a CSV file.
-    - Use our 'Upload CSV' feature and see your data come alive!
+    - Ensure your data is in CSV format.
+    - Use 'Upload CSV' to input.
 
-    ### Step 2: Get to Know Your Data 🔍
+    ### 2. Explore Trends  🔍
 
-    After loading, head over to the 'Exploratory Data Analysis' tab. Here, you can:
-    - View a quick summary of your dataset.
-    - Understand your data better through visual insights.
+    After uploading, check 'Exploratory Data Analysis' for:
+    - Dataset overview.
+    - Visualization insights.
 
-    ### Step 3: Predict with Confidence 🧠
+    ### 3. Model, Predict and Evaluate 🧠
 
-    Let MEDML handle the complexities:
-    - **Select your target**: Tell us what outcome you're interested in.
-    - **Input variables**: Highlight the factors that might influence the outcome.
-    - **Pick your predictor**: Don't fret over the names or how they work; just choose one or more and we handle the rest.
-    - **Optimize Hyperparameters?**: A fancy term that simply means "Make my predictions even better." Turn it on for optimized results.
+    - **Target**: Define the outcome.
+    - **Variables**: List influencing factors.
+    - **Predictor**: Pick one or more; MEDML handles the details.
+    - **Optimize Hyperparameters**: Enhance prediction accuracy.
 
     ---
 
-    Always keep in mind: MEDML is a tool to aid your expertise, not replace it. Your medical judgment is paramount. Need help? Reach out to us [here]().
+    MEDML aids, but doesn't replace, medical judgment. Need help? [Contact us]().
     """)
 
-    st.markdown("Now, navigate using the sidebar and embark on your data journey! 🎉")
+    st.markdown("Use the sidebar to start with MEDML!")
 
 elif nav == "Data":
 
