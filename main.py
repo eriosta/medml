@@ -21,7 +21,7 @@ if st.session_state.dataset_name:
 else:
     st.sidebar.info("No dataset currently loaded")
 
-nav = st.sidebar.radio("Start Building", ["Get Started","Data", "Exploratory Data Analysis", "Models"])
+nav = st.sidebar.radio("Start Building", ["Get Started","Data", "Exploratory Data Analysis", "Models", "Extra"])
 
 if nav == "Get Started":
     st.markdown("""
@@ -143,19 +143,20 @@ elif nav == "Models":
 
             plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
         
-        run_shap(trained_models, X_train, X_test, y_test, X_encoded)
+        run_shap(trained_models, X_train, X_test, y_test)
 
     else:
         st.warning("Please upload a dataset first under Data.")
 
-nav2 = st.sidebar.radio("Extra", ["Learn","Generative AI"])
+if nav == "Extra":
+    nav2 = st.sidebar.radio("Extra", ["Learn","Generative AI"])
 
-if nav2 == "Learn":
-    show()
+    if nav2 == "Learn":
+        show()
 
-if nav2 == "Generative AI":
-    # Sidebar Navigation
-    navigation = st.sidebar.radio('Navigation', ['Llama2'])
+    if nav2 == "Generative AI":
+        # Sidebar Navigation
+        navigation = st.sidebar.radio('Navigation', ['Llama2'])
 
-    if navigation == 'Llama2':
-        llama2()
+        if navigation == 'Llama2':
+            llama2()
