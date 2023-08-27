@@ -72,7 +72,36 @@ def get_model_hyperparameters(model_name):
 
     return params
 
-from time import sleep
+def plot_evaluation_metrics(models, X_test, y_test, VAR):
+    """Plot confusion matrices and ROC-AUC curves."""
+    num_models = len(models)
+    
+    if num_models == 1:
+        fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+        axs = np.array([axs])
+    else:
+        fig, axs = plt.subplots(num_models, 2, figsize=(12, 5 * num_models))
+    
+    for idx, (method, model) in enumerate(models.items()):
+        cm = confusion_matrix(y_test, model.predict(X_test))
+        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        
+        ConfusionMatrixDisplay(confusion_matrix=cm_normalized, display_labels=[f'No {VAR}', VAR]).plot(ax=axs[idx, 0], cmap='Blues', values_format=".2f")
+
+        y_prob = model.predict_proba(X_test)[:, 1]
+        fpr, tpr, _ = roc_curve(y_test, y_prob)
+        roc_disp = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_score(y_test, y_prob), estimator_name=method)
+        roc_disp.plot(ax=axs[idx, 1])
+
+        axs[idx, 1].set_title(f'ROC Curve: {method}')
+        axs[idx, 1].plot([0, 1], [0, 1], color='navy', linestyle='--')
+        axs[idx, 1].set_xlim([0.0, 1.0])
+        axs[idx, 1].set_ylim([0.0, 1.05])
+        axs[idx, 1].set_ylabel('True Positive Rate')
+        axs[idx, 1].set_xlabel('False Positive Rate')
+    
+    plt.tight_layout()
+    st.pyplot(fig)  # Replace plt.show() with this line
 
 def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize_hyperparams=False):
     """Train and evaluate machine learning models."""
@@ -127,67 +156,19 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
         progress.progress(model_count / total_models)
         sleep(0.1)
 
+    perform_shap_analysis(models, X_train, X_test, y_test)
+
     return results, models
 
-def plot_evaluation_metrics(models, X_test, y_test, VAR):
-    """Plot confusion matrices and ROC-AUC curves."""
-    num_models = len(models)
-    
-    if num_models == 1:
-        fig, axs = plt.subplots(1, 2, figsize=(12, 5))
-        axs = np.array([axs])
-    else:
-        fig, axs = plt.subplots(num_models, 2, figsize=(12, 5 * num_models))
-    
-    for idx, (method, model) in enumerate(models.items()):
-        cm = confusion_matrix(y_test, model.predict(X_test))
-        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        
-        ConfusionMatrixDisplay(confusion_matrix=cm_normalized, display_labels=[f'No {VAR}', VAR]).plot(ax=axs[idx, 0], cmap='Blues', values_format=".2f")
-
-        y_prob = model.predict_proba(X_test)[:, 1]
-        fpr, tpr, _ = roc_curve(y_test, y_prob)
-        roc_disp = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_score(y_test, y_prob), estimator_name=method)
-        roc_disp.plot(ax=axs[idx, 1])
-
-        axs[idx, 1].set_title(f'ROC Curve: {method}')
-        axs[idx, 1].plot([0, 1], [0, 1], color='navy', linestyle='--')
-        axs[idx, 1].set_xlim([0.0, 1.0])
-        axs[idx, 1].set_ylim([0.0, 1.05])
-        axs[idx, 1].set_ylabel('True Positive Rate')
-        axs[idx, 1].set_xlabel('False Positive Rate')
-    
-    plt.tight_layout()
-    st.pyplot(fig)  # Replace plt.show() with this line
-
-
-import shap
-# import pickle
-import streamlit as st
-from sklearn.metrics import roc_auc_score
-
-def run_shap(models, X_train, X_test, y_test):
-    """
-    Computes AUC, saves the best model, and visualizes results including SHAP explanations.
-    
-    Parameters:
-    - models: Dictionary containing trained machine learning models.
-    - X_train: Training data features.
-    - X_test: Testing data features.
-    - y_test: Testing data labels.
-    - X_encoded: Encoded data features (used for SHAP scatter plots).
-
-    Returns: None
-    """
-
+def perform_shap_analysis(models, X_train, X_test, y_test):
+    """Perform SHAP analysis on the best model."""
     # Compute AUC and add it to the results DataFrame
-    results = {}
     results['AUC'] = [roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]) for model in models.values()]
-    
-    best_method = max(results['AUC'], key=results['AUC'].get)
+
+    best_method = results.loc[results['AUC'].idxmax()]['Method']
     st.write(f"Best performing method (based on highest AUC): {best_method}")
 
-    # Save the best model as model.pkl
+    # Save the best model
     save_model = st.button('Save Best Model')
     if save_model:
         best_model = models[best_method]
@@ -195,30 +176,29 @@ def run_shap(models, X_train, X_test, y_test):
             pickle.dump(best_model, file)
         st.write("Model saved successfully!")
 
-    # Ask user if they want to perform SHAP explanations
+    # Perform SHAP explanations if user agrees
     if st.checkbox('Perform SHAP explanations?'):
-        # SHAP
         best_model = models[best_method]
         explainer = shap.Explainer(best_model, X_train)
         shap_values = explainer(X_test)
-        
-        # Visualize SHAP values
+
+        # SHAP summary plot
         st.write("SHAP Summary Plot:")
         shap.summary_plot(shap_values, X_test)
 
         # Allow user to select which interactions to display
-        available_columns = list(X_train.columns)
+        available_columns = list(X_test.columns)
         VARIABLESELECTED = st.selectbox("Choose feature for dependence plot", available_columns)
         st.write("SHAP Dependence Plot:")
         shap.dependence_plot(VARIABLESELECTED, shap_values, X_test)
 
-        # Allow user to scatter all interactions
+        # Scatter all interactions if user wants
         if st.checkbox('Show scatter plots for all features using SHAP values?'):
             for feature in available_columns:
                 st.write(f"Scatter Plot for {feature}:")
                 shap.plots.scatter(shap_values[:, feature], color=shap_values)
-                
-        # Ask if user wants to display force plot
+
+        # Display SHAP force plot for specific observation if user agrees
         if st.checkbox('Display SHAP force plot for a specific observation?'):
             index = st.number_input('Enter observation index:', min_value=0, max_value=len(X_test)-1, step=1)
             shap.plots.force(explainer.expected_value[0], shap_values[index], X_test.iloc[index])
