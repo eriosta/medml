@@ -118,6 +118,14 @@ elif nav == "Models":
                                                     active_color="#11567f", 
                                                     track_color="#29B5E8")
 
+        # Choice for SHAP using toggle
+        is_shap = tog.st_toggle_switch(label="Perform SHAP Explanations?", 
+                                                    key="is_shap_key", 
+                                                    default_value=False, 
+                                                    label_after=False, 
+                                                    inactive_color='#D3D3D3', 
+                                                    active_color="#11567f", 
+                                                    track_color="#29B5E8")
 
         selected_models = {}
         all_models = {
@@ -138,7 +146,12 @@ elif nav == "Models":
                 selected_models[model] = base_model
 
         if st.button("Train Models"):
-            results, trained_models = train_and_evaluate_models(X_train, y_train, X_test, y_test, selected_models, optimize_hyperparams)
+            results, trained_models = train_and_evaluate_models(
+                X_train, y_train, X_test, y_test,
+                selected_models, 
+                optimize_hyperparams,
+                is_shap)
+
             st.write(results)
             plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
         

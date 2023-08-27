@@ -103,7 +103,7 @@ def plot_evaluation_metrics(models, X_test, y_test, VAR):
     plt.tight_layout()
     st.pyplot(fig)  # Replace plt.show() with this line
 
-def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize_hyperparams=False):
+def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize_hyperparams=False,is_shap=False):
     """Train and evaluate machine learning models."""
     results = pd.DataFrame(columns=['Method', 'Accuracy', 'Precision', 'Recall', 'F1'])
 
@@ -156,11 +156,11 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
         progress.progress(model_count / total_models)
         sleep(0.1)
 
-    perform_shap_analysis(models, X_train, X_test, y_test, results)
+    perform_shap_analysis(models, X_train, X_test, y_test, results,is_shap=is_shap)
 
     return results, models
 
-def perform_shap_analysis(models, X_train, X_test, y_test, results):
+def perform_shap_analysis(models, X_train, X_test, y_test, results, is_shap):
     """Perform SHAP analysis on the best model."""
     # Compute AUC and add it to the results DataFrame
     results['AUC'] = [roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]) for model in models.values()]
@@ -168,16 +168,16 @@ def perform_shap_analysis(models, X_train, X_test, y_test, results):
     best_method = results.loc[results['AUC'].idxmax()]['Method']
     st.write(f"Best performing method (based on highest AUC): {best_method}")
 
-    # Save the best model
-    save_model = st.button('Save Best Model')
-    if save_model:
-        best_model = models[best_method]
-        with open('model.pkl', 'wb') as file:
-            pickle.dump(best_model, file)
-        st.write("Model saved successfully!")
+    # # Save the best model
+    # save_model = st.button('Save Best Model')
+    # if save_model:
+    #     best_model = models[best_method]
+    #     with open('model.pkl', 'wb') as file:
+    #         pickle.dump(best_model, file)
+    #     st.write("Model saved successfully!")
 
     # Perform SHAP explanations if user agrees
-    if st.checkbox('Perform SHAP explanations?'):
+    if is_shap is not False:
         best_model = models[best_method]
         explainer = shap.Explainer(best_model, X_train)
         shap_values = explainer(X_test)
