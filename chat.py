@@ -3,7 +3,7 @@ import replicate
 import os
 import random
 
- suggested_questions = [
+suggested_questions = [
         "How does this chatbot work?",
         "How can I get my own API key?",
         "What's the difference between a dataset and a database?",
