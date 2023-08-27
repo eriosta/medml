@@ -8,3 +8,4 @@ replicate
 pandasai
 matplotlib
 openai
+bs4
