@@ -4,3 +4,4 @@ streamlit
 kaggle
 xgboost
 streamlit-toggle-switch
+replicate

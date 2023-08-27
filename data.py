@@ -44,12 +44,22 @@ def display_metadata(existing_datasets):
 
     # Create a dataframe
     df_datasets = pd.DataFrame({
-        "Username/Source": [dataset.split('/')[0] for dataset in existing_datasets],
+        "Path": existing_datasets,
         "Available Datasets": dataset_names,
         "Description": dataset_descriptions,
         "Task": dataset_tasks
     })
 
-    # Display the table
+    # Display the header
     st.header("Kaggle Datasets")
-    st.table(df_datasets)
+    
+    # Display each dataset in a collapsible section
+    for index, row in df_datasets.iterrows():
+        with st.expander(row["Available Datasets"]):
+            st.write("**Path:**", row["Path"])
+            st.write("**Description:**", row["Description"])
+            st.write("**Task:**", row["Task"])
+
+# You can then call the function as:
+# existing_datasets_sample = ["user1/dataset1", "user2/dataset2"]  # Example datasets
+# display_metadata(existing_datasets_sample)

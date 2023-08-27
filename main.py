@@ -6,6 +6,7 @@ import pandas as pd
 import os
 from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
 from learn import show
+from chat import llama2
 
 st.sidebar.title("MEDML")
 
@@ -21,6 +22,10 @@ else:
     st.sidebar.info("No dataset currently loaded")
 
 nav = st.sidebar.radio("Navigation", ["Get Started","Data", "Exploratory Data Analysis", "Models", "Learn"])
+
+# Emable chat
+if st.checkbox("Enable Llama2 Chatbot"):
+    llama2()
 
 if nav == "Get Started":
     st.markdown("""
