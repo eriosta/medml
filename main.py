@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit_toggle as tog
-from data import setup_kaggle_env_variables, download_kaggle_dataset, display_metadata
+from data import data_run
 from eda import generate_eda
 import pandas as pd
 import os
@@ -62,71 +62,7 @@ if nav == "Get Started":
     st.markdown("Use the sidebar to start with MEDML!")
 
 elif nav == "Data":
-
-    data_source = st.sidebar.radio("Choose Data Source", ["Kaggle", "Upload CSV"])
-
-    if data_source == "Kaggle":
-
-        st.info("""
-    ## How to get your Kaggle credentials
-    1. Log in to [Kaggle](https://www.kaggle.com/).
-    2. Go to your Account page (click on your profile picture on the top-right).
-    3. Scroll down to the `API` section.
-    4. Click on “Create New API Token”.
-    5. This will download a file named `kaggle.json`.
-    6. Open the file and you'll find your `username` and `key`.
-    """)
-            
-        kaggle_username = st.sidebar.text_input("Kaggle Username")
-        kaggle_key = st.sidebar.text_input("Kaggle Key", type="password")
-
-        if kaggle_username and kaggle_key:
-            try:
-                setup_kaggle_env_variables(kaggle_username, kaggle_key)
-                st.sidebar.success("Kaggle setup complete!")
-            except Exception as e:
-                st.sidebar.error(f"Error: {e}")
-
-        existing_datasets = [
-            "jillanisofttech/brain-stroke-dataset",
-            "akshaydattatraykhare/diabetes-dataset",
-            "fedesoriano/heart-failure-prediction",
-            "mathurinache/sepsis-survival-minimal-clinical-records",
-            "mirichoi0218/insurance",
-            "protobioengineering/mit-bih-arrhythmia-database-modern-2023"
-        ]
-
-        # Display the table
-        display_metadata(existing_datasets)
-
-        dataset_choice = st.sidebar.selectbox("Choose a Kaggle Dataset", ["Other Kaggle Dataset"] + existing_datasets)
-        dataset_path = dataset_choice if dataset_choice != "Other Kaggle Dataset" else st.sidebar.text_input("Enter Kaggle Dataset Path")
-
-        if dataset_path:
-            try:
-                zip_name = download_kaggle_dataset(dataset_path)
-                zip_path = os.path.join(zip_name)
-                st.sidebar.success(f"{dataset_path} downloaded!")
-                st.session_state.dataset_name = dataset_path.split("/")[-1]  # store dataset name to session state
-
-                with open(zip_path, 'rb') as f:
-                    bytes_data = f.read()
-                st.sidebar.download_button(
-                    label="Download Dataset Zip",
-                    data=bytes_data,
-                    file_name=f"{dataset_choice}.zip",
-                    mime="application/zip"
-                )
-            except Exception as e:
-                st.sidebar.error(f"Error: {e}")
-
-    else:
-        uploaded_file = st.sidebar.file_uploader("Upload your CSV file", type="csv")
-        if uploaded_file:
-            st.sidebar.success("CSV file uploaded!")
-            st.session_state.df = pd.read_csv(uploaded_file)
-            st.session_state.dataset_name = uploaded_file.name  # store actual filename to session state
-            st.write(st.session_state.df.head())
+    data_run()
 
 elif nav == "Exploratory Data Analysis":
     if st.session_state.df is not None:
