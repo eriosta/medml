@@ -128,8 +128,8 @@ def pandas_ai():
                 type="csv",
             )
             if uploaded_file is not None:
-                # Use SmartDataframe and include the StreamlitMiddleware
-                st.session_state.df = SmartDataframe(uploaded_file, {"middlewares": [StreamlitMiddleware()]})
+                df = pd.read_csv(uploaded_file) # Read the uploaded file into a dataframe
+                st.session_state.df = SmartDataframe(df, {"middlewares": [StreamlitMiddleware()]}) # Use the dataframe
 
         with st.form("Question"):
             question = st.text_input("Question", value="", type="default")
