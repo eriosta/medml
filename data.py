@@ -189,12 +189,15 @@ def transform():
                 if np.issubdtype(col_dtype, np.number):
                     condition = st.text_input(f"Condition for {col} (e.g., > 50):")
                     output_value = st.text_input(f"Output value for condition {condition}:")
+                    
                     try:
-                        conditions.append(st.session_state.temp_df[col].eval(condition))
+                        condition_str = f"`{col}` {condition}"
+                        filtered_df = st.session_state.temp_df.query(condition_str)
+                        conditions.append(st.session_state.temp_df.index.isin(filtered_df.index))
                         outputs.append(float(output_value))
-                    except:
-                        st.warning(f"Invalid condition or output for numeric column: {col}")
-    
+                    except Exception as e:
+                        st.warning(f"Invalid condition or output for numeric column: {col}. Error: {e}")
+
                 # For string/object types
                 elif np.issubdtype(col_dtype, np.object):
                     unique_vals = st.session_state.temp_df[col].unique().tolist()
