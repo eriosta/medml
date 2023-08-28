@@ -9,7 +9,8 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score,
-                            confusion_matrix, roc_curve, roc_auc_score, ConfusionMatrixDisplay, RocCurveDisplay)
+                            confusion_matrix, roc_curve, roc_auc_score, ConfusionMatrixDisplay, RocCurveDisplay, 
+                            mean_absolute_error, mean_squared_error, classification_report)
 import xgboost as xgb
 from xgboost import XGBRegressor, XGBClassifier
 import shap
@@ -73,41 +74,61 @@ def get_model_hyperparameters(model_name):
 
     return params
 
-def plot_evaluation_metrics(models, X_test, y_test, VAR):
-    """Plot confusion matrices and ROC-AUC curves."""
+def plot_evaluation_metrics(models, X_test, y_test, VAR, task_type):
+    """Plot evaluation metrics based on the task type."""
     num_models = len(models)
-    
+
+    if task_type == "regression":
+        # For regression, there's no need for confusion matrix and ROC curve
+        st.write("For regression tasks, use appropriate metrics like MAE, MSE, etc.")
+        return
+
     if num_models == 1:
         fig, axs = plt.subplots(1, 2, figsize=(12, 5))
         axs = np.array([axs])
     else:
         fig, axs = plt.subplots(num_models, 2, figsize=(12, 5 * num_models))
-    
+
     for idx, (method, model) in enumerate(models.items()):
-        cm = confusion_matrix(y_test, model.predict(X_test))
-        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        
-        ConfusionMatrixDisplay(confusion_matrix=cm_normalized, display_labels=[f'No {VAR}', VAR]).plot(ax=axs[idx, 0], cmap='Blues', values_format=".2f")
+        y_pred = model.predict(X_test)
 
-        y_prob = model.predict_proba(X_test)[:, 1]
-        fpr, tpr, _ = roc_curve(y_test, y_prob)
-        roc_disp = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_score(y_test, y_prob), estimator_name=method)
-        roc_disp.plot(ax=axs[idx, 1])
+        if task_type == "binary_classification":
+            cm = confusion_matrix(y_test, y_pred)
+            ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[f'No {VAR}', VAR]).plot(ax=axs[idx, 0])
+            y_prob = model.predict_proba(X_test)[:, 1]
+            fpr, tpr, _ = roc_curve(y_test, y_prob)
+            roc_disp = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_score(y_test, y_prob), estimator_name=method)
+            roc_disp.plot(ax=axs[idx, 1])
+        elif task_type == "multiclass_classification":
+            cm = confusion_matrix(y_test, y_pred)
+            ConfusionMatrixDisplay(confusion_matrix=cm).plot(ax=axs[idx, 0])
+            # One-vs-all ROC curves can be plotted if needed
 
-        axs[idx, 1].set_title(f'ROC Curve: {method}')
-        axs[idx, 1].plot([0, 1], [0, 1], color='navy', linestyle='--')
+        axs[idx, 1].set_title(f'Evaluation Metric: {method}')
         axs[idx, 1].set_xlim([0.0, 1.0])
         axs[idx, 1].set_ylim([0.0, 1.05])
         axs[idx, 1].set_ylabel('True Positive Rate')
         axs[idx, 1].set_xlabel('False Positive Rate')
-    
+
     plt.tight_layout()
-    st.pyplot(fig)  # Replace plt.show() with this line
+    st.pyplot(fig)
 
-def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize_hyperparams=False):
+def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, task_type, optimize_hyperparams=False):
     """Train and evaluate machine learning models."""
-    results = pd.DataFrame(columns=['Method', 'Accuracy', 'Precision', 'Recall', 'F1'])
+    
+    results = pd.DataFrame(columns=['Method'])
+    basic_metrics = []
 
+    # Determine which metrics to compute based on the task type.
+    if task_type in ["binary_classification", "multiclass_classification"]:
+        basic_metrics = ['Accuracy', 'Precision', 'Recall', 'F1']
+    elif task_type == "regression":
+        basic_metrics = ['MAE', 'MSE']
+
+    for metric in basic_metrics:
+        results[metric] = None
+
+    # Parameter grid for hyperparameter optimization.
     param_grids = {
         'Logistic Regression': {
             'C': [0.001, 0.01, 0.1, 1, 10, 100],
@@ -132,6 +153,7 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
     model_count = 0
 
     for method, model in models.items():
+        # Hyperparameter optimization.
         if optimize_hyperparams and method in param_grids:
             st.write(f"Optimizing hyperparameters for {method}...")
             grid_search = GridSearchCV(model, param_grids[method], cv=5)
@@ -141,25 +163,29 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
             best_model = model
             best_model.fit(X_train, y_train)
 
-        # Update the models dict with the trained model
-        models[method] = best_model
-
         y_pred = best_model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
 
-        new_row = {'Method': method, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1': f1}
+        # Store results depending on task type.
+        if task_type in ["binary_classification", "multiclass_classification"]:
+            avg_method = 'weighted' if task_type == "multiclass_classification" else 'binary'
+            accuracy = accuracy_score(y_test, y_pred)
+            precision = precision_score(y_test, y_pred, average=avg_method)
+            recall = recall_score(y_test, y_pred, average=avg_method)
+            f1 = f1_score(y_test, y_pred, average=avg_method)
+            new_row = {'Method': method, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1': f1}
+        elif task_type == "regression":
+            mae = mean_absolute_error(y_test, y_pred)
+            mse = mean_squared_error(y_test, y_pred)
+            new_row = {'Method': method, 'MAE': mae, 'MSE': mse}
+
         results.loc[len(results)] = new_row
 
+        # Update progress.
         model_count += 1
         progress.progress(model_count / total_models)
         sleep(0.1)
 
     return results, models
-
-import matplotlib.pyplot as plt
 
 def perform_shap(models, X_train, X_test, y_test, results):
     """Perform SHAP analysis on the best model."""
@@ -274,13 +300,18 @@ def train():
 
     if st.button("Train Models"):
         results, trained_models = train_and_evaluate_models(
-            X_train, y_train, X_test, y_test,
-            selected_models, 
-            optimize_hyperparams)
+                                                            X_train, y_train, X_test, y_test,
+                                                            selected_models, 
+                                                            optimize_hyperparams,
+                                                            task_type=task)
 
         st.session_state.trained_models = trained_models  # Saving the models to session state
         st.session_state.results = results
 
         st.write(results)
 
-        plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
+        plot_evaluation_metrics(selected_models,
+                                X_test, y_test,
+                                VAR,
+                                task_type=task)
+
