@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import streamlit_toggle as tog
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, GridSearchCV
