@@ -67,7 +67,7 @@ def data_run():
     data_source = st.sidebar.radio("Choose Data Source", ["Use demo","Upload file","Kaggle"])
 
     if data_source == "Use demo":
-        return pd.read_csv("heart_disease_uci.csv)
+        return pd.read_csv("heart_disease_uci.csv")
 
     elif data_source == "Kaggle":
 
