@@ -145,52 +145,52 @@ def transform():
             
         # Filtering
         st.subheader("Filter Data")
-        filter_column = st.selectbox("Select column to filter on:", st.session_state.df.columns)
+        filter_column = st.selectbox("Select column to filter on:", st.session_state.temp_df.columns)
         min_value = st.number_input(f"Minimum value for {filter_column}")
         max_value = st.number_input(f"Maximum value for {filter_column}")
-        st.session_state.df = st.session_state.df[st.session_state.df[filter_column].between(min_value, max_value)]
+        st.session_state.temp_df = st.session_state.temp_df[st.session_state.temp_df[filter_column].between(min_value, max_value)]
         st.write("Filtered Data:")
-        st.write(st.session_state.df.head())
+        st.write(st.session_state.temp_df.head())
     
         # Transformations
         st.subheader("Transform Data")
-        cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.df.columns)
+        cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.temp_df.columns)
         transform_type = st.selectbox("Transformation type:", ["Log", "Square root", "Custom (x^2)"])
         if st.button("Apply Transformation"):
             for col in cols_to_transform:
                 if transform_type == "Log":
-                    st.session_state.df[col] = np.log1p(st.session_state.df[col])
+                    st.session_state.temp_df[col] = np.log1p(st.session_state.temp_df[col])
                 elif transform_type == "Square root":
-                    st.session_state.df[col] = np.sqrt(st.session_state.df[col])
+                    st.session_state.temp_df[col] = np.sqrt(st.session_state.temp_df[col])
                 else:
-                    st.session_state.df[col] = st.session_state.df[col]**2
+                    st.session_state.temp_df[col] = st.session_state.temp_df[col]**2
             st.write("Transformed Data:")
-            st.write(st.session_state.df.head())
+            st.write(st.session_state.temp_df.head())
     
         # Add Columns
         st.subheader("Add New Column")
         new_col_name = st.text_input("New column name:")
         new_col_formula = st.text_input("Formula (e.g., col1 + col2):")
         if st.button("Add Column"):
-            df[new_col_name] = df.eval(new_col_formula)
+            st.session_state.temp_df[new_col_name] = st.session_state.temp_df.eval(new_col_formula)
             st.write("Data with New Column:")
-            st.write(df.head())
+            st.write(st.session_state.temp_df.head())
     
         # Remove Columns
         st.subheader("Remove Columns")
-        cols_to_remove = st.multiselect("Select columns to remove:", df.columns)
+        cols_to_remove = st.multiselect("Select columns to remove:", st.session_state.temp_df.columns)
         if st.button("Remove Selected Columns"):
-            df.drop(cols_to_remove, axis=1, inplace=True)
+            st.session_state.temp_df.drop(cols_to_remove, axis=1, inplace=True)
             st.write("Data after Column Removal:")
-            st.write(df.head())
+            st.write(st.session_state.temp_df.head())
     
         # One-Hot Encoding
         st.subheader("One-Hot Encoding")
-        cols_to_encode = st.multiselect("Select categorical columns to one-hot encode:", df.columns)
+        cols_to_encode = st.multiselect("Select categorical columns to one-hot encode:", st.session_state.temp_df.columns)
         if st.button("One-Hot Encode"):
-            df = pd.get_dummies(df, columns=cols_to_encode)
+            st.session_state.temp_df = pd.get_dummies(st.session_state.temp_df, columns=cols_to_encode)
             st.write("One-Hot Encoded Data:")
-            st.write(df.head())
+            st.write(st.session_state.temp_df.head())
     
         # Button to save changes
         if st.button("Save Changes"):
