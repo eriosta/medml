@@ -10,6 +10,26 @@ from chat import llama2
 
 st.sidebar.title("MEDML")
 
+def print_module_versions():
+    module_names = [
+        "streamlit", "streamlit_toggle", "pandas", "os", "numpy", "matplotlib", 
+        "sklearn", "shap", "xgboost", "time", "pandas_profiling", "subprocess", "replicate"
+    ]
+
+    for module_name in module_names:
+        try:
+            module = globals().get(module_name)  # fetch the module from globals
+            if module:
+                version = getattr(module, "__version__", "Version attribute not available")
+                st.write(f"{module_name}: {version}")
+            else:
+                st.write(f"{module_name} module not loaded or available in current scope.")
+        except Exception as e:
+            st.write(f"Error fetching version for {module_name}: {str(e)}")
+
+# You can then call this function in your Streamlit app:
+print_module_versions()
+
 # Initialize dataset and dataset name in session state
 if 'df' not in st.session_state:
     st.session_state.df = None
