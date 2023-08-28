@@ -177,9 +177,9 @@ def perform_shap(models, X_train, X_test, y_test, results):
 
     # Allow user to select which interactions to display
     available_columns = list(X_test.columns)
-    VARIABLESELECTED = st.selectbox("Choose feature for dependence plot", available_columns)
-    st.write("SHAP Dependence Plot:")
-    shap.dependence_plot(VARIABLESELECTED, shap_values, X_test)
+    # VARIABLESELECTED = st.selectbox("Choose feature for dependence plot", available_columns)
+    # st.write("SHAP Dependence Plot:")
+    # shap.dependence_plot(VARIABLESELECTED, shap_values, X_test)
 
     # Scatter all interactions if user wants
     if st.checkbox('Show scatter plots for all features using SHAP values?'):
