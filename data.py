@@ -69,7 +69,7 @@ def data_run():
     if data_source == "Use demo":
         st.session_state.df = pd.read_csv("heart_disease_uci.csv")
         st.session_state.dataset_name = "heart_disease_uci"
-        st.write(st.session_state.df.head())
+        st.write(st.session_state.df)
 
     elif data_source == "Kaggle":
 
@@ -141,7 +141,7 @@ def data_run():
                 st.session_state.df = pd.read_excel(uploaded_file)
 
             st.session_state.dataset_name = uploaded_file.name  # store actual filename to session state
-            st.write(st.session_state.df.head())
+            st.write(st.session_state.df)
 
 def transform():
     # st.warning("Under construction")
