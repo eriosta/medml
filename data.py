@@ -2,6 +2,7 @@ import os
 import subprocess
 import pandas as pd
 import streamlit as st
+import base64
 
 def setup_kaggle_env_variables(username, key):
     """Set up environment variables for Kaggle."""
@@ -134,3 +135,74 @@ def data_run():
 
             st.session_state.dataset_name = uploaded_file.name  # store actual filename to session state
             st.write(st.session_state.df.head())
+
+def transform():
+    if "df" in st.session_state:
+
+        # Create a temporary DataFrame to apply transformations
+        if 'temp_df' not in st.session_state:
+            st.session_state.temp_df = st.session_state.df.copy()
+            
+        # Filtering
+        st.subheader("Filter Data")
+        filter_column = st.selectbox("Select column to filter on:", st.session_state.df.columns)
+        min_value = st.number_input(f"Minimum value for {filter_column}")
+        max_value = st.number_input(f"Maximum value for {filter_column}")
+        st.session_state.df = st.session_state.df[st.session_state.df[filter_column].between(min_value, max_value)]
+        st.write("Filtered Data:")
+        st.write(st.session_state.df.head())
+    
+        # Transformations
+        st.subheader("Transform Data")
+        cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.df.columns)
+        transform_type = st.selectbox("Transformation type:", ["Log", "Square root", "Custom (x^2)"])
+        if st.button("Apply Transformation"):
+            for col in cols_to_transform:
+                if transform_type == "Log":
+                    st.session_state.df[col] = np.log1p(st.session_state.df[col])
+                elif transform_type == "Square root":
+                    st.session_state.df[col] = np.sqrt(st.session_state.df[col])
+                else:
+                    st.session_state.df[col] = st.session_state.df[col]**2
+            st.write("Transformed Data:")
+            st.write(st.session_state.df.head())
+    
+        # Add Columns
+        st.subheader("Add New Column")
+        new_col_name = st.text_input("New column name:")
+        new_col_formula = st.text_input("Formula (e.g., col1 + col2):")
+        if st.button("Add Column"):
+            df[new_col_name] = df.eval(new_col_formula)
+            st.write("Data with New Column:")
+            st.write(df.head())
+    
+        # Remove Columns
+        st.subheader("Remove Columns")
+        cols_to_remove = st.multiselect("Select columns to remove:", df.columns)
+        if st.button("Remove Selected Columns"):
+            df.drop(cols_to_remove, axis=1, inplace=True)
+            st.write("Data after Column Removal:")
+            st.write(df.head())
+    
+        # One-Hot Encoding
+        st.subheader("One-Hot Encoding")
+        cols_to_encode = st.multiselect("Select categorical columns to one-hot encode:", df.columns)
+        if st.button("One-Hot Encode"):
+            df = pd.get_dummies(df, columns=cols_to_encode)
+            st.write("One-Hot Encoded Data:")
+            st.write(df.head())
+    
+        # Button to save changes
+        if st.button("Save Changes"):
+            st.session_state.df = st.session_state.temp_df.copy()
+            st.success("Changes saved successfully!")
+
+        # Download Processed Data
+        st.subheader("Download Processed Data")
+        if st.button("Download"):
+            csv = st.session_state.df.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download Processed Data as CSV</a>'
+            st.markdown(href, unsafe_allow_html=True)
+    else:
+        st.warning("Go to Data section to start")
