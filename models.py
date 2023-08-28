@@ -158,6 +158,8 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, optimize
 
     return results, models
 
+import matplotlib.pyplot as plt
+
 def perform_shap(models, X_train, X_test, y_test, results):
     """Perform SHAP analysis on the best model."""
     # Compute AUC and add it to the results DataFrame
@@ -173,21 +175,26 @@ def perform_shap(models, X_train, X_test, y_test, results):
 
     # SHAP summary plot
     st.write("SHAP Summary Plot:")
-    shap.summary_plot(shap_values, X_test)
-
-    # Allow user to select which interactions to display
-    available_columns = list(X_test.columns)
-    # VARIABLESELECTED = st.selectbox("Choose feature for dependence plot", available_columns)
-    # st.write("SHAP Dependence Plot:")
-    # shap.dependence_plot(VARIABLESELECTED, shap_values, X_test)
+    shap.summary_plot(shap_values, X_test, plot_type='bar', show=False)
+    plt.tight_layout()
+    st.pyplot(plt.gcf())
+    plt.close()
 
     # Scatter all interactions if user wants
+    available_columns = list(X_test.columns)
     if st.checkbox('Show scatter plots for all features using SHAP values?'):
         for feature in available_columns:
             st.write(f"Scatter Plot for {feature}:")
-            shap.plots.scatter(shap_values[:, feature], color=shap_values)
+            shap.plots.scatter(shap_values[:, feature], color=shap_values, show=False)
+            plt.tight_layout()
+            st.pyplot(plt.gcf())
+            plt.close()
 
     # Display SHAP force plot for specific observation if user agrees
     if st.checkbox('Display SHAP force plot for a specific observation?'):
         index = st.number_input('Enter observation index:', min_value=0, max_value=len(X_test)-1, step=1)
-        shap.plots.force(explainer.expected_value[0], shap_values[index], X_test.iloc[index])
+        shap.force_plot(explainer.expected_value[0], shap_values[index], X_test.iloc[index], matplotlib=True, show=False)
+        plt.tight_layout()
+        st.pyplot(plt.gcf())
+        plt.close()
+
