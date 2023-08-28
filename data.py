@@ -137,73 +137,70 @@ def data_run():
             st.write(st.session_state.df.head())
 
 def transform():
-    st.warning("Under construction")
-    # if "df" in st.session_state:
+    # st.warning("Under construction")
+    if "df" in st.session_state:
+         # Create a temporary DataFrame to apply transformations
+         if 'temp_df' not in st.session_state:
+             st.session_state.temp_df = st.session_state.df.copy()
+              
+    # Transformations
+    st.subheader("Transform Data")
+    cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.df.columns)
+    
+    if cols_to_transform:
+        # Detect the data type of the first selected column (for simplicity)
+        col_dtype = st.session_state.df[cols_to_transform[0]].dtype
 
-    #     # Create a temporary DataFrame to apply transformations
-    #     if 'temp_df' not in st.session_state:
-    #         st.session_state.temp_df = st.session_state.df.copy()
-            
-    #     # Filtering
-    #     st.subheader("Filter Data")
-    #     filter_column = st.selectbox("Select column to filter on:", st.session_state.temp_df.columns)
-    #     min_value = st.number_input(f"Minimum value for {filter_column}")
-    #     max_value = st.number_input(f"Maximum value for {filter_column}")
-    #     st.session_state.temp_df = st.session_state.temp_df[st.session_state.temp_df[filter_column].between(min_value, max_value)]
-    #     st.write("Filtered Data:")
-    #     st.write(st.session_state.temp_df.head())
-    
-    #     # Transformations
-    #     st.subheader("Transform Data")
-    #     cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.temp_df.columns)
-    #     transform_type = st.selectbox("Transformation type:", ["Log", "Square root", "Custom (x^2)"])
-    #     if st.button("Apply Transformation"):
-    #         for col in cols_to_transform:
-    #             if transform_type == "Log":
-    #                 st.session_state.temp_df[col] = np.log1p(st.session_state.temp_df[col])
-    #             elif transform_type == "Square root":
-    #                 st.session_state.temp_df[col] = np.sqrt(st.session_state.temp_df[col])
-    #             else:
-    #                 st.session_state.temp_df[col] = st.session_state.temp_df[col]**2
-    #         st.write("Transformed Data:")
-    #         st.write(st.session_state.temp_df.head())
-    
-    #     # Add Columns
-    #     st.subheader("Add New Column")
-    #     new_col_name = st.text_input("New column name:")
-    #     new_col_formula = st.text_input("Formula (e.g., col1 + col2):")
-    #     if st.button("Add Column"):
-    #         st.session_state.temp_df[new_col_name] = st.session_state.temp_df.eval(new_col_formula)
-    #         st.write("Data with New Column:")
-    #         st.write(st.session_state.temp_df.head())
-    
-    #     # Remove Columns
-    #     st.subheader("Remove Columns")
-    #     cols_to_remove = st.multiselect("Select columns to remove:", st.session_state.temp_df.columns)
-    #     if st.button("Remove Selected Columns"):
-    #         st.session_state.temp_df.drop(cols_to_remove, axis=1, inplace=True)
-    #         st.write("Data after Column Removal:")
-    #         st.write(st.session_state.temp_df.head())
-    
-    #     # One-Hot Encoding
-    #     st.subheader("One-Hot Encoding")
-    #     cols_to_encode = st.multiselect("Select categorical columns to one-hot encode:", st.session_state.temp_df.columns)
-    #     if st.button("One-Hot Encode"):
-    #         st.session_state.temp_df = pd.get_dummies(st.session_state.temp_df, columns=cols_to_encode)
-    #         st.write("One-Hot Encoded Data:")
-    #         st.write(st.session_state.temp_df.head())
-    
-    #     # Button to save changes
-    #     if st.button("Save Changes"):
-    #         st.session_state.df = st.session_state.temp_df.copy()
-    #         st.success("Changes saved successfully!")
+        if np.issubdtype(col_dtype, np.number):  # if numeric
+            transform_type = st.selectbox("Transformation type:", ["Log", "Square root", "Custom (x^2)"])
+            if st.button("Apply Numeric Transformation"):
+                for col in cols_to_transform:
+                    if transform_type == "Log":
+                        st.session_state.df[col] = np.log1p(st.session_state.df[col])
+                    elif transform_type == "Square root":
+                        st.session_state.df[col] = np.sqrt(st.session_state.df[col])
+                    else:
+                        st.session_state.df[col] = st.session_state.df[col]**2
 
-    #     # Download Processed Data
-    #     st.subheader("Download Processed Data")
-    #     if st.button("Download"):
-    #         csv = st.session_state.df.to_csv(index=False)
-    #         b64 = base64.b64encode(csv.encode()).decode()
-    #         href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download Processed Data as CSV</a>'
-    #         st.markdown(href, unsafe_allow_html=True)
-    # else:
-    #     st.warning("Go to Data section to start")
+        elif np.issubdtype(col_dtype, np.object):  # if string/object
+            transform_type = st.selectbox("Transformation type:", ["Capitalize", "Lowercase", "Uppercase"])
+            if st.button("Apply String Transformation"):
+                for col in cols_to_transform:
+                    if transform_type == "Capitalize":
+                        st.session_state.df[col] = st.session_state.df[col].str.capitalize()
+                    elif transform_type == "Lowercase":
+                        st.session_state.df[col] = st.session_state.df[col].str.lower()
+                    else:
+                        st.session_state.df[col] = st.session_state.df[col].str.upper()
+
+        elif np.issubdtype(col_dtype, np.bool_):  # if boolean
+            # Add specific transformations for boolean columns if required
+            pass
+        else:
+            st.warning(f"No predefined transformations for data type {col_dtype}")
+
+        st.write("Transformed Data:")
+        st.write(st.session_state.df.head())
+        
+     # One-Hot Encoding
+     st.subheader("One-Hot Encoding")
+     cols_to_encode = st.multiselect("Select categorical columns to one-hot encode:", st.session_state.temp_df.columns)
+     if st.button("One-Hot Encode"):
+         st.session_state.temp_df = pd.get_dummies(st.session_state.temp_df, columns=cols_to_encode)
+         st.write("One-Hot Encoded Data:")
+         st.write(st.session_state.temp_df.head())
+
+     # Button to save changes
+     if st.button("Save Changes"):
+         st.session_state.df = st.session_state.temp_df.copy()
+         st.success("Changes saved successfully!")
+
+     # Download Processed Data
+     st.subheader("Download Processed Data")
+     if st.button("Download"):
+         csv = st.session_state.df.to_csv(index=False)
+         b64 = base64.b64encode(csv.encode()).decode()
+         href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download Processed Data as CSV</a>'
+         st.markdown(href, unsafe_allow_html=True)
+ else:
+     st.warning("Go to Data section to start")
