@@ -77,7 +77,7 @@ elif nav == "Exploratory Data Analysis":
         except Exception as e:
             st.error(f"Error generating report: {e}")
     else:
-        st.warning("Please upload a dataset first under Data.")
+        st.warning("Please upload a dataset under **Data** first.")
 
 elif nav == "Models":
 
