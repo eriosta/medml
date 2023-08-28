@@ -139,10 +139,10 @@ def data_run():
 def transform():
     # st.warning("Under construction")
     if "df" in st.session_state:
-         # Create a temporary DataFrame to apply transformations
-         if 'temp_df' not in st.session_state:
-             st.session_state.temp_df = st.session_state.df.copy()
-              
+        # Create a temporary DataFrame to apply transformations
+        if 'temp_df' not in st.session_state:
+            st.session_state.temp_df = st.session_state.df.copy()
+
         # Transformations
         st.subheader("Transform Data")
         cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.df.columns)
