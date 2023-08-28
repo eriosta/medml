@@ -158,24 +158,15 @@ elif nav == "Models":
                 plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
 
         if model_page == 'Explain':
+            
             if 'trained_models' in st.session_state:
                 trained_models = st.session_state.trained_models
                 X_train, X_test, y_train, y_test = st.session_state['data_split']
                 results = st.session_state['results']
-
-                # You can move the toggle switch for SHAP here
-                is_shap = tog.st_toggle_switch(label="Perform SHAP Explanations?", 
-                                               key="is_shap_key", 
-                                               default_value=False, 
-                                               label_after=False, 
-                                               inactive_color='#D3D3D3', 
-                                               active_color="#11567f", 
-                                               track_color="#29B5E8")
-                
-                if is_shap:
-                    perform_shap(trained_models,
-                                 X_train, X_test, y_test,
-                                 results)
+               
+                perform_shap(trained_models,
+                                X_train, X_test, y_test,
+                                results)
 
     else:
         st.warning("Please upload a dataset first under Data.")
