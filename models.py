@@ -162,39 +162,41 @@ import matplotlib.pyplot as plt
 
 def perform_shap(models, X_train, X_test, y_test, results):
     """Perform SHAP analysis on the best model."""
+    
     # Compute AUC and add it to the results DataFrame
     results['AUC'] = [roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]) for model in models.values()]
 
     best_method = results.loc[results['AUC'].idxmax()]['Method']
+    best_auc = results.loc[results['AUC'].idxmax()]['AUC']  # Extract the AUC of the best model
+    
+    # Display the best method and its AUC
     st.write(f"Best performing method (based on highest AUC): {best_method}")
-
+    st.write(f"AUC for {best_method}: {best_auc:.4f}")  # Displaying the AUC with 4 decimal points
+    
     # Perform SHAP explanations if user agrees
     best_model = models[best_method]
     explainer = shap.Explainer(best_model, X_train)
     shap_values = explainer(X_test)
 
     # SHAP summary plot
-    st.write("SHAP Summary Plot:")
+    st.write("SHAP Summary Bar Plot:")
     shap.summary_plot(shap_values, X_test, plot_type='bar', show=False)
+    plt.tight_layout()
+    st.pyplot(plt.gcf())
+    plt.close()
+
+    st.write("SHAP Summary Violin Plot:")
+    shap.summary_plot(shap_values, X_test, plot_type='violin', show=False)
     plt.tight_layout()
     st.pyplot(plt.gcf())
     plt.close()
 
     # Scatter all interactions if user wants
     available_columns = list(X_test.columns)
-    if st.checkbox('Show scatter plots for all features using SHAP values?'):
+    if st.checkbox('Show interaction plots for all features?'):
         for feature in available_columns:
             st.write(f"Scatter Plot for {feature}:")
             shap.plots.scatter(shap_values[:, feature], color=shap_values, show=False)
             plt.tight_layout()
             st.pyplot(plt.gcf())
             plt.close()
-
-    # Display SHAP force plot for specific observation if user agrees
-    if st.checkbox('Display SHAP force plot for a specific observation?'):
-        index = st.number_input('Enter observation index:', min_value=0, max_value=len(X_test)-1, step=1)
-        shap.force_plot(explainer.expected_value[0], shap_values[index], X_test.iloc[index], matplotlib=True, show=False)
-        plt.tight_layout()
-        st.pyplot(plt.gcf())
-        plt.close()
-
