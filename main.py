@@ -80,6 +80,7 @@ elif nav == "Exploratory Data Analysis":
         st.warning("Please upload a dataset first under Data.")
 
 elif nav == "Models":
+
     if st.session_state.df is not None:
         
         # Create a checkbox to decide whether to display the data head or not
@@ -151,26 +152,28 @@ elif nav == "Models":
 
             plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
 
-            # Choice for SHAP using toggle
-            is_shap = tog.st_toggle_switch(label="Perform SHAP Explanations?", 
-                                                        key="is_shap_key", 
-                                                        default_value=False, 
-                                                        label_after=False, 
-                                                        inactive_color='#D3D3D3', 
-                                                        active_color="#11567f", 
-                                                        track_color="#29B5E8")
+        # Add a sub-page for model explanation
+        model_page = st.selectbox("Navigate", ['Train & Evaluate', 'Explain'], index=0)
 
-            if is_shap:
-                if 'trained_models' in st.session_state:
+        if model_page == 'Explain':
+            if 'trained_models' in st.session_state:
+                trained_models = st.session_state.trained_models
+                X_train, X_test, y_train, y_test = st.session_state['data_split']
+                results = st.session_state['results']
 
-                    trained_models = st.session_state.trained_models
-                    X_train, X_test, y_train, y_test = st.session_state['data_split']
-                    results = st.session_state['results']
-
-                    # Now use trained_models for your tasks
+                # You can move the toggle switch for SHAP here
+                is_shap = tog.st_toggle_switch(label="Perform SHAP Explanations?", 
+                                               key="is_shap_key", 
+                                               default_value=False, 
+                                               label_after=False, 
+                                               inactive_color='#D3D3D3', 
+                                               active_color="#11567f", 
+                                               track_color="#29B5E8")
+                
+                if is_shap:
                     perform_shap(trained_models,
-                                X_train, X_test, y_test,
-                                results)
+                                 X_train, X_test, y_test,
+                                 results)
 
     else:
         st.warning("Please upload a dataset first under Data.")
