@@ -4,7 +4,7 @@ from data import data_run
 from eda import generate_eda
 import pandas as pd
 import os
-from models import prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
+from models import perform_shap, prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
 from learn import show
 from chat import llama2
 
@@ -106,7 +106,9 @@ elif nav == "Models":
         col2.write(f"Train Set Size: {(1 - test_size) * 100:.0f}%")
 
         X_train, X_test, y_train, y_test = prepare_data(st.session_state.df, VAR, training_vars, categorical_features, test_size)
-        
+
+        st.session_state['data_split'] = (X_train, X_test, y_train, y_test)
+
         model_selection = st.multiselect("Select Models", ["Logistic Regression", "Random Forest Classifier", "Gradient Boosting Classifier", "Decision Tree Classifier"])
         
         # Choice for Hyperparameter Optimization using toggle
@@ -149,12 +151,27 @@ elif nav == "Models":
             results, trained_models = train_and_evaluate_models(
                 X_train, y_train, X_test, y_test,
                 selected_models, 
-                optimize_hyperparams,
-                is_shap)
+                optimize_hyperparams)
+
+            st.session_state.trained_models = trained_models  # Saving the models to session state
+            st.session_state.results = results
 
             st.write(results)
+
             plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
-        
+
+        if st.buttom("Perform SHAP"):
+            if 'trained_models' in st.session_state:
+
+                trained_models = st.session_state.trained_models
+                X_train, X_test, y_train, y_test = st.session_state['data_split']
+                results = st.session_state['results']
+
+                # Now use trained_models for your tasks
+                perform_shap(trained_models,
+                             X_train, X_test, y_test,
+                             results)
+
     else:
         st.warning("Please upload a dataset first under Data.")
 
