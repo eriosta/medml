@@ -193,19 +193,26 @@ def transform():
                     
                     # Create a condition-input mechanism for the selected column
                     num_conditions = st.session_state.get("num_conditions", 1)
+                    
                     for i in range(num_conditions):
                         condition = st.text_input(f"Condition {i+1} for {col} (e.g., > 50):")
                         output_value = st.text_input(f"Output value for condition {condition}:")
                         
-                        # Store the condition and output_value in the dictionary
-                        conditions_dict[condition] = float(output_value)
+                        # Validate the condition and output value before storing them
+                        try:
+                            dummy_df = pd.DataFrame({col: [0]})
+                            dummy_df.query(f"{col} {condition}")
+                            conditions_dict[condition] = float(output_value)
+                        except:
+                            st.warning(f"Invalid condition {condition} or output value {output_value} for column {col}.")
                     
                     # Allow user to add more conditions
                     if st.button("+ Add Another Condition"):
                         st.session_state.num_conditions += 1
-                    
+                        
                     # Apply conditions to the dataframe
                     else_output_value = st.text_input(f"Default output value if NO conditions are met:")
+                    
                     try:
                         new_col_name = f"{col}_new"
                         
@@ -215,13 +222,15 @@ def transform():
                         for condition, value in conditions_dict.items():
                             condition_str = f"`{col}` {condition}"
                             filtered_df = st.session_state.temp_df.query(condition_str)
-                            
                             st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
                         
                         st.write(f"Column {new_col_name} added to the DataFrame.")
+                        st.write(st.session_state.temp_df.head())
                         
                     except Exception as e:
-                        st.warning(f"Invalid condition or output for numeric column: {col}. Error: {e}")
+                        st.warning(f"An error occurred while processing the conditions. Error: {e}")
+                
+
                 
 
                     
