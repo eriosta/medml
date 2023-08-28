@@ -232,17 +232,6 @@ def transform():
                    
                 else:
                     st.warning(f"No predefined conditions for data type {col_dtype}")
-    
-            new_column_name = st.text_input("Name of new column:")
-    
-            if st.button("Add New Column"):
-                if len(conditions) == 0 or not new_column_name:
-                    st.warning("Please specify all conditions and the new column name")
-                else:
-                    # Create a new column based on the conditions
-                    st.session_state.temp_df[new_column_name] = np.select(conditions, outputs, default=None)
-                    st.success(f"New column '{new_column_name}' added!")
-                    st.write(st.session_state.temp_df.head())
         
         # Transformations
         st.subheader("Transform Data")
