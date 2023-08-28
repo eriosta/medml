@@ -82,78 +82,80 @@ elif nav == "Exploratory Data Analysis":
 elif nav == "Models":
 
     if st.session_state.df is not None:
-        
-        # Create a checkbox to decide whether to display the data head or not
-        if st.checkbox("View data? (Head Only)"):
-            st.dataframe(st.session_state.df.head())
 
-        # Select the target variable
-        VAR = st.selectbox("Select Target Variable", st.session_state.df.columns)
+        # Add a sub-page for model explanation in the sidebar using radio buttons
+        model_page = st.sidebar.radio("Navigate", ['Train & Evaluate', 'Explain'])
 
-        # Select the training variables
-        training_vars = st.multiselect("Select Variables for Training (excluding target)", 
-                                       st.session_state.df.columns.difference([VAR]))
+        if model_page == 'Train & Evaluate':
 
-        # From the selected training variables, select the categorical ones for encoding
-        categorical_features = st.multiselect("Select Categorical Variables to Encode", training_vars)
+            # Create a checkbox to decide whether to display the data head or not
+            if st.checkbox("View data? (Head Only)"):
+                st.dataframe(st.session_state.df.head())
 
-        # Create two columns to display train and test percentages side by side
-        col1, col2 = st.columns(2)
+            # Select the target variable
+            VAR = st.selectbox("Select Target Variable", st.session_state.df.columns)
 
-        # Slider for test set size
-        test_size = col1.slider('Select Test Set Size (%)', min_value=5, max_value=50, value=20) / 100
+            # Select the training variables
+            training_vars = st.multiselect("Select Variables for Training (excluding target)", 
+                                        st.session_state.df.columns.difference([VAR]))
 
-        # Display the train set size in the next column
-        col2.write(f"Train Set Size: {(1 - test_size) * 100:.0f}%")
+            # From the selected training variables, select the categorical ones for encoding
+            categorical_features = st.multiselect("Select Categorical Variables to Encode", training_vars)
 
-        X_train, X_test, y_train, y_test = prepare_data(st.session_state.df, VAR, training_vars, categorical_features, test_size)
+            # Create two columns to display train and test percentages side by side
+            col1, col2 = st.columns(2)
 
-        st.session_state['data_split'] = (X_train, X_test, y_train, y_test)
+            # Slider for test set size
+            test_size = col1.slider('Select Test Set Size (%)', min_value=5, max_value=50, value=20) / 100
 
-        model_selection = st.multiselect("Select Models", ["Logistic Regression", "Random Forest Classifier", "Gradient Boosting Classifier", "Decision Tree Classifier"])
-        
-        # Choice for Hyperparameter Optimization using toggle
-        optimize_hyperparams = tog.st_toggle_switch(label="Optimize Hyperparameters?", 
-                                                    key="optimize_hyperparams_key", 
-                                                    default_value=False, 
-                                                    label_after=False, 
-                                                    inactive_color='#D3D3D3', 
-                                                    active_color="#11567f", 
-                                                    track_color="#29B5E8")
+            # Display the train set size in the next column
+            col2.write(f"Train Set Size: {(1 - test_size) * 100:.0f}%")
 
-        selected_models = {}
-        all_models = {
-            'Logistic Regression': LogisticRegression(max_iter=10000, class_weight='balanced'),
-            'Random Forest Classifier': RandomForestClassifier(),
-            'Gradient Boosting Classifier': XGBClassifier(use_label_encoder=False, eval_metric='logloss'),
-            'Decision Tree Classifier': DecisionTreeClassifier()
-        }
+            X_train, X_test, y_train, y_test = prepare_data(st.session_state.df, VAR, training_vars, categorical_features, test_size)
 
-        for model in model_selection:
-            selected_models[model] = all_models[model]
+            st.session_state['data_split'] = (X_train, X_test, y_train, y_test)
 
-            if optimize_hyperparams:
-                user_defined_params = get_model_hyperparameters(model)
-                base_model = all_models[model]
-                # Update base model with user-defined hyperparameters
-                base_model.set_params(**user_defined_params)
-                selected_models[model] = base_model
+            model_selection = st.multiselect("Select Models", ["Logistic Regression", "Random Forest Classifier", "Gradient Boosting Classifier", "Decision Tree Classifier"])
+            
+            # Choice for Hyperparameter Optimization using toggle
+            optimize_hyperparams = tog.st_toggle_switch(label="Optimize Hyperparameters?", 
+                                                        key="optimize_hyperparams_key", 
+                                                        default_value=False, 
+                                                        label_after=False, 
+                                                        inactive_color='#D3D3D3', 
+                                                        active_color="#11567f", 
+                                                        track_color="#29B5E8")
 
-        if st.button("Train Models"):
-            results, trained_models = train_and_evaluate_models(
-                X_train, y_train, X_test, y_test,
-                selected_models, 
-                optimize_hyperparams)
+            selected_models = {}
+            all_models = {
+                'Logistic Regression': LogisticRegression(max_iter=10000, class_weight='balanced'),
+                'Random Forest Classifier': RandomForestClassifier(),
+                'Gradient Boosting Classifier': XGBClassifier(use_label_encoder=False, eval_metric='logloss'),
+                'Decision Tree Classifier': DecisionTreeClassifier()
+            }
 
-            st.session_state.trained_models = trained_models  # Saving the models to session state
-            st.session_state.results = results
+            for model in model_selection:
+                selected_models[model] = all_models[model]
 
-            st.write(results)
+                if optimize_hyperparams:
+                    user_defined_params = get_model_hyperparameters(model)
+                    base_model = all_models[model]
+                    # Update base model with user-defined hyperparameters
+                    base_model.set_params(**user_defined_params)
+                    selected_models[model] = base_model
 
-            plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
+            if st.button("Train Models"):
+                results, trained_models = train_and_evaluate_models(
+                    X_train, y_train, X_test, y_test,
+                    selected_models, 
+                    optimize_hyperparams)
 
-        # Add a sub-page for model explanation
-        model_page = st.selectbox("Navigate", ['Train & Evaluate', 'Explain'], index=0)
+                st.session_state.trained_models = trained_models  # Saving the models to session state
+                st.session_state.results = results
+
+                st.write(results)
+
+                plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
 
         if model_page == 'Explain':
             if 'trained_models' in st.session_state:
