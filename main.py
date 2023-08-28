@@ -172,7 +172,7 @@ elif nav == "Models":
                 st.warning("Please train a model under Train & Evaluate first.")
 
     else:
-        st.warning("Please upload a dataset under Data first.")
+        st.warning("Please upload a dataset under **Data** first.")
 
 if nav == "Extra":
     nav2 = st.sidebar.radio("Extra", ["Learn","Generative AI"])
