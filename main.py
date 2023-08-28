@@ -158,8 +158,9 @@ elif nav == "Models":
                 plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
 
         if model_page == 'Explain':
-            
+
             if 'trained_models' in st.session_state:
+
                 trained_models = st.session_state.trained_models
                 X_train, X_test, y_train, y_test = st.session_state['data_split']
                 results = st.session_state['results']
@@ -167,9 +168,11 @@ elif nav == "Models":
                 perform_shap(trained_models,
                                 X_train, X_test, y_test,
                                 results)
+            else:
+                st.warning("Please train a model under Train & Evaluate first.")
 
     else:
-        st.warning("Please upload a dataset first under Data.")
+        st.warning("Please upload a dataset under Data first.")
 
 if nav == "Extra":
     nav2 = st.sidebar.radio("Extra", ["Learn","Generative AI"])
