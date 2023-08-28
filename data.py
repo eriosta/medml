@@ -3,6 +3,7 @@ import subprocess
 import pandas as pd
 import streamlit as st
 import base64
+import numpy as np
 
 def setup_kaggle_env_variables(username, key):
     """Set up environment variables for Kaggle."""
