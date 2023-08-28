@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit_toggle as tog
-from data import data_run
+from data import data_run, transform
 from eda import generate_eda
 import pandas as pd
 import os
@@ -83,7 +83,8 @@ elif nav == "Data":
         else:
             st.warning("Please upload a dataset under **Data** first.")
     elif data_page == "Transformation":
-         st.warning("Under construction.")
+         transform()
+        
 elif nav == "Models":
 
     if st.session_state.df is not None:
