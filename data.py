@@ -71,53 +71,29 @@ def data_run():
         st.session_state.dataset_name = "heart_disease_uci"
         st.write(st.session_state.df)
 
-        with st.expander("id"):
-            st.write("**id**: Unique id for each patient")
-        
-        with st.expander("age"):
-            st.write("**age**: Age of the patient in years")
-        
-        with st.expander("origin"):
-            st.write("**origin**: place of study")
-        
-        with st.expander("sex"):
-            st.write("**sex**: Male/Female")
-        
-        with st.expander("cp"):
-            st.write("**cp**: chest pain type (typical angina, atypical angina, non-anginal, asymptomatic)")
-        
-        with st.expander("trestbps"):
-            st.write("**trestbps**: resting blood pressure (in mm Hg on admission to the hospital)")
-        
-        with st.expander("chol"):
-            st.write("**chol**: serum cholesterol in mg/dl")
-        
-        with st.expander("fbs"):
-            st.write("**fbs**: if fasting blood sugar > 120 mg/dl")
-        
-        with st.expander("restecg"):
-            st.write("**restecg**: resting electrocardiographic results (Values: normal, stt abnormality, lv hypertrophy)")
-        
-        with st.expander("thalach"):
-            st.write("**thalach**: maximum heart rate achieved")
-        
-        with st.expander("exang"):
-            st.write("**exang**: exercise-induced angina (True/ False)")
-        
-        with st.expander("oldpeak"):
-            st.write("**oldpeak**: ST depression induced by exercise relative to rest")
-        
-        with st.expander("slope"):
-            st.write("**slope**: the slope of the peak exercise ST segment")
-        
-        with st.expander("ca"):
-            st.write("**ca**: number of major vessels (0-3) colored by fluoroscopy")
-        
-        with st.expander("thal"):
-            st.write("**thal**: normal; fixed defect; reversible defect")
-        
-        with st.expander("num"):
-            st.write("**num**: the predicted attribute; 0=no heart disease; 1,2,3,4 = stages of heart disease.")
+        with st.expander("Dataset Info: Heart Disease Prediction"):
+            
+            st.markdown("**Patient Demographics**")
+            st.markdown("- **id**: Unique id for each patient")
+            st.markdown("- **age**: Age of the patient in years")
+            st.markdown("- **origin**: Place of study")
+            st.markdown("- **sex**: Gender (Male/Female)")
+            
+            st.markdown("**Clinical Metrics**")
+            st.markdown("- **trestbps**: Resting blood pressure (in mm Hg on admission)")
+            st.markdown("- **chol**: Serum cholesterol level (in mg/dl)")
+            st.markdown("- **fbs**: Fasting blood sugar (> 120 mg/dl indicates True)")
+            st.markdown("- **thalach**: Maximum heart rate achieved during a stress test")
+            st.markdown("- **oldpeak**: ST depression induced by exercise relative to rest")
+            st.markdown("- **cp**: Type of chest pain experienced ([typical angina, atypical angina, non-anginal, asymptomatic])")
+            st.markdown("- **restecg**: Resting electrocardiographic results ([normal, stt abnormality, lv hypertrophy])")
+            st.markdown("- **exang**: Whether exercise-induced angina was experienced (True/False)")
+            st.markdown("- **slope**: Slope of the peak exercise ST segment")
+            st.markdown("- **ca**: Number of major blood vessels (0-3) visible via fluoroscopy")
+            st.markdown("- **thal**: Heart defect type ([normal, fixed defect, reversible defect])")
+            
+            st.markdown("**Prediction Outcome**")
+            st.markdown("- **num**: Predicted heart disease stage; 0 = no disease; 1-4 indicate increasing severity.")
 
     elif data_source == "Kaggle":
 
