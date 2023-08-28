@@ -229,11 +229,7 @@ def transform():
                         
                     except Exception as e:
                         st.warning(f"An error occurred while processing the conditions. Error: {e}")
-                
-
-                
-
-                    
+                   
                 else:
                     st.warning(f"No predefined conditions for data type {col_dtype}")
     
