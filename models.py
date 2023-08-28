@@ -302,8 +302,8 @@ def train():
         results, trained_models = train_and_evaluate_models(
                                                             X_train, y_train, X_test, y_test,
                                                             selected_models, 
-                                                            optimize_hyperparams,
-                                                            task_type=task)
+                                                            task,
+                                                            optimize_hyperparams)
 
         st.session_state.trained_models = trained_models  # Saving the models to session state
         st.session_state.results = results
