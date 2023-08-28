@@ -64,9 +64,12 @@ def display_metadata(existing_datasets):
 
 def data_run():
 
-    data_source = st.sidebar.radio("Choose Data Source", ["Upload file","Kaggle"])
+    data_source = st.sidebar.radio("Choose Data Source", ["Use demo","Upload file","Kaggle"])
 
-    if data_source == "Kaggle":
+    if data_source == "Use demo":
+        return pd.read_csv("heart_disease_uci.csv)
+
+    elif data_source == "Kaggle":
 
         st.info("""
     ## How to get your Kaggle credentials
