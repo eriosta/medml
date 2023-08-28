@@ -183,18 +183,38 @@ def transform():
             outputs = []
     
             for col in condition_columns:
-                condition = st.text_input(f"Condition for {col} (e.g., > 50):")
-                output_value = st.text_input(f"Output value for condition {condition}:")
-                
-                if condition:
+                col_dtype = st.session_state.temp_df[col].dtype
+    
+                # For numeric types
+                if np.issubdtype(col_dtype, np.number):
+                    condition = st.text_input(f"Condition for {col} (e.g., > 50):")
+                    output_value = st.text_input(f"Output value for condition {condition}:")
                     try:
                         conditions.append(st.session_state.temp_df[col].eval(condition))
-                        outputs.append(output_value)
+                        outputs.append(float(output_value))
                     except:
-                        st.warning(f"Invalid condition for column: {col}")
-            
+                        st.warning(f"Invalid condition or output for numeric column: {col}")
+    
+                # For string/object types
+                elif np.issubdtype(col_dtype, np.object):
+                    unique_vals = st.session_state.temp_df[col].unique().tolist()
+                    chosen_val = st.selectbox(f"Choose value for {col}:", unique_vals)
+                    output_value = st.text_input(f"Output value for {col} equals '{chosen_val}':")
+                    conditions.append(st.session_state.temp_df[col] == chosen_val)
+                    outputs.append(output_value)
+    
+                # For boolean types
+                elif np.issubdtype(col_dtype, np.bool_):
+                    chosen_val = st.selectbox(f"Choose value for {col}:", [True, False])
+                    output_value = st.text_input(f"Output value for {col} equals '{chosen_val}':")
+                    conditions.append(st.session_state.temp_df[col] == chosen_val)
+                    outputs.append(output_value)
+                    
+                else:
+                    st.warning(f"No predefined conditions for data type {col_dtype}")
+    
             new_column_name = st.text_input("Name of new column:")
-            
+    
             if st.button("Add New Column"):
                 if len(conditions) == 0 or not new_column_name:
                     st.warning("Please specify all conditions and the new column name")
