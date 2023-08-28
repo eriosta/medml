@@ -67,7 +67,9 @@ def data_run():
     data_source = st.sidebar.radio("Choose Data Source", ["Use demo","Upload file","Kaggle"])
 
     if data_source == "Use demo":
-        return pd.read_csv("heart_disease_uci.csv")
+        st.session_state.df = pd.read_csv("heart_disease_uci.csv")
+        st.session_state.dataset_name = uploaded_file.name  # store actual filename to session state
+        st.write(st.session_state.df.head())
 
     elif data_source == "Kaggle":
 
