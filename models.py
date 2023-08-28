@@ -116,17 +116,10 @@ def plot_evaluation_metrics(models, X_test, y_test, VAR, task_type):
 def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, task_type, optimize_hyperparams=False):
     """Train and evaluate machine learning models."""
     
-    results = pd.DataFrame(columns=['Method'])
-    basic_metrics = []
+    # Ensure proper task_type
+    assert task_type in ["binary_classification", "multiclass_classification", "regression"], "Invalid task type specified"
 
-    # Determine which metrics to compute based on the task type.
-    if task_type in ["binary_classification", "multiclass_classification"]:
-        basic_metrics = ['Accuracy', 'Precision', 'Recall', 'F1']
-    elif task_type == "regression":
-        basic_metrics = ['MAE', 'MSE']
-
-    for metric in basic_metrics:
-        results[metric] = None
+    results_list = []
 
     # Parameter grid for hyperparameter optimization.
     param_grids = {
@@ -153,38 +146,48 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test, models, task_typ
     model_count = 0
 
     for method, model in models.items():
-        # Hyperparameter optimization.
-        if optimize_hyperparams and method in param_grids:
-            st.write(f"Optimizing hyperparameters for {method}...")
-            grid_search = GridSearchCV(model, param_grids[method], cv=5)
-            grid_search.fit(X_train, y_train)
-            best_model = grid_search.best_estimator_
-        else:
-            best_model = model
-            best_model.fit(X_train, y_train)
+        try:
+            # Hyperparameter optimization.
+            if optimize_hyperparams and method in param_grids:
+                st.write(f"Optimizing hyperparameters for {method}...")
+                grid_search = GridSearchCV(model, param_grids[method], cv=5, n_jobs=-1)
+                grid_search.fit(X_train, y_train)
+                best_model = grid_search.best_estimator_
+            else:
+                best_model = model
+                best_model.fit(X_train, y_train)
 
-        y_pred = best_model.predict(X_test)
+            y_pred = best_model.predict(X_test)
 
-        # Store results depending on task type.
-        if task_type in ["binary_classification", "multiclass_classification"]:
-            avg_method = 'weighted' if task_type == "multiclass_classification" else 'binary'
-            accuracy = accuracy_score(y_test, y_pred)
-            precision = precision_score(y_test, y_pred, average=avg_method)
-            recall = recall_score(y_test, y_pred, average=avg_method)
-            f1 = f1_score(y_test, y_pred, average=avg_method)
-            new_row = {'Method': method, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1': f1}
-        elif task_type == "regression":
-            mae = mean_absolute_error(y_test, y_pred)
-            mse = mean_squared_error(y_test, y_pred)
-            new_row = {'Method': method, 'MAE': mae, 'MSE': mse}
+            # Store results depending on task type.
+            metrics = {}
+            if task_type in ["binary_classification", "multiclass_classification"]:
+                avg_method = 'weighted' if task_type == "multiclass_classification" else 'binary'
+                metrics = {
+                    'Accuracy': accuracy_score(y_test, y_pred),
+                    'Precision': precision_score(y_test, y_pred, average=avg_method),
+                    'Recall': recall_score(y_test, y_pred, average=avg_method),
+                    'F1': f1_score(y_test, y_pred, average=avg_method)
+                }
+            elif task_type == "regression":
+                metrics = {
+                    'MAE': mean_absolute_error(y_test, y_pred),
+                    'MSE': mean_squared_error(y_test, y_pred)
+                }
 
-        results.loc[len(results)] = new_row
+            results_list.append({'Method': method, **metrics})
+            
+            # Update trained model
+            models[method] = best_model
 
-        # Update progress.
-        model_count += 1
-        progress.progress(model_count / total_models)
-        sleep(0.1)
+            # Update progress.
+            model_count += 1
+            progress.progress(model_count / total_models)
 
+        except Exception as e:
+            st.warning(f"An error occurred while processing {method}: {str(e)}")
+
+    results = pd.DataFrame(results_list)
     return results, models
 
 def perform_shap(models, X_train, X_test, y_test, results):
