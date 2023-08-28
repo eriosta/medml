@@ -1,14 +1,6 @@
 import streamlit as st
 import replicate
 import os
-import random
-import pandas as pd
-from pandasai import PandasAI
-import matplotlib.pyplot as plt
-
-from pandasai import PandasAI, SmartDataframe
-from pandasai.llm.openai import OpenAI
-from pandasai.middlewares import StreamlitMiddleware
 
 suggested_questions = [
         "How does this chatbot work?",
