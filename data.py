@@ -71,14 +71,14 @@ def data_run():
         st.session_state.dataset_name = "heart_disease_uci"
         st.write(st.session_state.df)
 
-        with st.expander("Dataset Info: Heart Disease Prediction"):
+        with st.expander("Metadata: Heart Disease UCI"):
             
             st.markdown("**Patient Demographics**")
             st.markdown("- **id**: Unique id for each patient")
             st.markdown("- **age**: Age of the patient in years")
             st.markdown("- **origin**: Place of study")
             st.markdown("- **sex**: Gender (Male/Female)")
-            
+            st.markdown(" ")
             st.markdown("**Clinical Metrics**")
             st.markdown("- **trestbps**: Resting blood pressure (in mm Hg on admission)")
             st.markdown("- **chol**: Serum cholesterol level (in mg/dl)")
@@ -91,10 +91,10 @@ def data_run():
             st.markdown("- **slope**: Slope of the peak exercise ST segment")
             st.markdown("- **ca**: Number of major blood vessels (0-3) visible via fluoroscopy")
             st.markdown("- **thal**: Heart defect type ([normal, fixed defect, reversible defect])")
-            
+            st.markdown(" ")
             st.markdown("**Prediction Outcome**")
             st.markdown("- **num**: Predicted heart disease stage; 0 = no disease; 1-4 indicate increasing severity.")
-
+            
     elif data_source == "Kaggle":
 
         st.info("""
