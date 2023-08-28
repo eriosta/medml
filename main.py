@@ -21,7 +21,7 @@ if st.session_state.dataset_name:
 else:
     st.sidebar.info("No dataset currently loaded")
 
-nav = st.sidebar.radio("Start Building", ["Get Started","Data", "Exploratory Data Analysis", "Models", "Extra"])
+nav = st.sidebar.radio("Start Building", ["Get Started","Data", "Models", "Extra"])
 
 if nav == "Get Started":
     st.markdown("""
@@ -62,23 +62,28 @@ if nav == "Get Started":
     st.markdown("Use the sidebar to start with MEDML!")
 
 elif nav == "Data":
-    data_run()
+    # Add a sub-page for model explanation in the sidebar using radio buttons
+    data_page = st.sidebar.radio("Navigate", ['Source', 'Exploratory Analysis','Transformation'])
 
-elif nav == "Exploratory Data Analysis":
-    if st.session_state.df is not None:
-        try:
-            report_data = generate_eda(st.session_state.df)
-            st.sidebar.download_button(
-                label="Download EDA Report",
-                data=report_data,
-                file_name="EDA.html",
-                mime="text/html"
-            )
-        except Exception as e:
-            st.error(f"Error generating report: {e}")
-    else:
-        st.warning("Please upload a dataset under **Data** first.")
+    if data_page == 'Source':
+            data_run()
 
+    elif data_page == "Exploratory Analysis":
+        if st.session_state.df is not None:
+            try:
+                report_data = generate_eda(st.session_state.df)
+                st.sidebar.download_button(
+                    label="Download EDA Report",
+                    data=report_data,
+                    file_name="EDA.html",
+                    mime="text/html"
+                )
+            except Exception as e:
+                st.error(f"Error generating report: {e}")
+        else:
+            st.warning("Please upload a dataset under **Data** first.")
+    elif data_page == "Transformation":
+         st.warning("Under construction.")
 elif nav == "Models":
 
     if st.session_state.df is not None:
