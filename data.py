@@ -174,6 +174,36 @@ def transform():
         if 'temp_df' not in st.session_state:
             st.session_state.temp_df = st.session_state.df.copy()
 
+        # Add Column Based on Conditions
+        st.subheader("Add Column Based on Conditions")
+        condition_columns = st.multiselect("Select columns for conditions:", st.session_state.temp_df.columns)
+    
+        if condition_columns:
+            conditions = []
+            outputs = []
+    
+            for col in condition_columns:
+                condition = st.text_input(f"Condition for {col} (e.g., > 50):")
+                output_value = st.text_input(f"Output value for condition {condition}:")
+                
+                if condition:
+                    try:
+                        conditions.append(st.session_state.temp_df[col].eval(condition))
+                        outputs.append(output_value)
+                    except:
+                        st.warning(f"Invalid condition for column: {col}")
+            
+            new_column_name = st.text_input("Name of new column:")
+            
+            if st.button("Add New Column"):
+                if len(conditions) == 0 or not new_column_name:
+                    st.warning("Please specify all conditions and the new column name")
+                else:
+                    # Create a new column based on the conditions
+                    st.session_state.temp_df[new_column_name] = np.select(conditions, outputs, default=None)
+                    st.success(f"New column '{new_column_name}' added!")
+                    st.write(st.session_state.temp_df.head())
+        
         # Transformations
         st.subheader("Transform Data")
         cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.df.columns)
