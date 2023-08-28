@@ -185,33 +185,45 @@ def transform():
             for col in condition_columns:
                 col_dtype = st.session_state.temp_df[col].dtype
     
+                # A dictionary to store conditions and their corresponding output values for each column
+                conditions_dict = {}
+                
                 # For numeric types
                 if np.issubdtype(col_dtype, np.number):
-                    condition = st.text_input(f"Condition for {col} (e.g., > 50):")
-                    output_value = st.text_input(f"Output value for condition {condition}:")
                     
+                    # Create a condition-input mechanism for the selected column
+                    num_conditions = st.session_state.get("num_conditions", 1)
+                    for i in range(num_conditions):
+                        condition = st.text_input(f"Condition {i+1} for {col} (e.g., > 50):")
+                        output_value = st.text_input(f"Output value for condition {condition}:")
+                        
+                        # Store the condition and output_value in the dictionary
+                        conditions_dict[condition] = float(output_value)
+                    
+                    # Allow user to add more conditions
+                    if st.button("+ Add Another Condition"):
+                        st.session_state.num_conditions += 1
+                    
+                    # Apply conditions to the dataframe
+                    else_output_value = st.text_input(f"Default output value if NO conditions are met:")
                     try:
-                        condition_str = f"`{col}` {condition}"
-                        filtered_df = st.session_state.temp_df.query(condition_str)
-                        conditions.append(st.session_state.temp_df.index.isin(filtered_df.index))
-                        outputs.append(float(output_value))
+                        new_col_name = f"{col}_new"
+                        
+                        # Initializing the new column with the default value
+                        st.session_state.temp_df[new_col_name] = float(else_output_value)
+                        
+                        for condition, value in conditions_dict.items():
+                            condition_str = f"`{col}` {condition}"
+                            filtered_df = st.session_state.temp_df.query(condition_str)
+                            
+                            st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
+                        
+                        st.write(f"Column {new_col_name} added to the DataFrame.")
+                        
                     except Exception as e:
                         st.warning(f"Invalid condition or output for numeric column: {col}. Error: {e}")
+                
 
-                # For string/object types
-                elif np.issubdtype(col_dtype, np.object):
-                    unique_vals = st.session_state.temp_df[col].unique().tolist()
-                    chosen_val = st.selectbox(f"Choose value for {col}:", unique_vals)
-                    output_value = st.text_input(f"Output value for {col} equals '{chosen_val}':")
-                    conditions.append(st.session_state.temp_df[col] == chosen_val)
-                    outputs.append(output_value)
-    
-                # For boolean types
-                elif np.issubdtype(col_dtype, np.bool_):
-                    chosen_val = st.selectbox(f"Choose value for {col}:", [True, False])
-                    output_value = st.text_input(f"Output value for {col} equals '{chosen_val}':")
-                    conditions.append(st.session_state.temp_df[col] == chosen_val)
-                    outputs.append(output_value)
                     
                 else:
                     st.warning(f"No predefined conditions for data type {col_dtype}")
