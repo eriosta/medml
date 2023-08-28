@@ -239,9 +239,6 @@ def train():
     # Select the target variable
     VAR = st.selectbox("Select Target Variable", st.session_state.df.columns)
 
-    # Let the user choose the type of ML task
-    task = st.sidebar.selectbox("Choose Machine Learning Task", ["Regression", "Binary Classification", "Multiclass Classification"])
-
     # Select the training variables
     training_vars = st.multiselect("Select Variables for Training (excluding target)", 
                                 st.session_state.df.columns.difference([VAR]))
@@ -262,11 +259,8 @@ def train():
 
     st.session_state['data_split'] = (X_train, X_test, y_train, y_test)
 
-    if task == "Regression":
-        model_selection = st.multiselect("Select Models", ["Linear Regression", "Random Forest Regressor", "Gradient Boosting Regressor"])
-    else:
-        model_selection = st.multiselect("Select Models", ["Logistic Regression", "Random Forest Classifier", "Gradient Boosting Classifier", "Decision Tree Classifier"])
-
+    model_selection = st.multiselect("Select Models", ["Logistic Regression", "Random Forest Classifier", "Gradient Boosting Classifier", "Decision Tree Classifier"])
+    
     # Choice for Hyperparameter Optimization using toggle
     optimize_hyperparams = tog.st_toggle_switch(label="Optimize Hyperparameters?", 
                                                 key="optimize_hyperparams_key", 
@@ -277,19 +271,12 @@ def train():
                                                 track_color="#29B5E8")
 
     selected_models = {}
-    if task == "Regression":
-        all_models = {
-            'Linear Regression': LinearRegression(),
-            'Random Forest Regressor': RandomForestRegressor(),
-            'Gradient Boosting Regressor': XGBRegressor()
-        }
-    else:
-        all_models = {
-            'Logistic Regression': LogisticRegression(max_iter=10000, class_weight='balanced'),
-            'Random Forest Classifier': RandomForestClassifier(),
-            'Gradient Boosting Classifier': XGBClassifier(use_label_encoder=False, eval_metric='logloss'),
-            'Decision Tree Classifier': DecisionTreeClassifier()
-        }
+    all_models = {
+        'Logistic Regression': LogisticRegression(max_iter=10000, class_weight='balanced'),
+        'Random Forest Classifier': RandomForestClassifier(),
+        'Gradient Boosting Classifier': XGBClassifier(use_label_encoder=False, eval_metric='logloss'),
+        'Decision Tree Classifier': DecisionTreeClassifier()
+    }
 
     for model in model_selection:
         selected_models[model] = all_models[model]
@@ -303,18 +290,13 @@ def train():
 
     if st.button("Train Models"):
         results, trained_models = train_and_evaluate_models(
-                                                            X_train, y_train, X_test, y_test,
-                                                            selected_models, 
-                                                            task,
-                                                            optimize_hyperparams)
+            X_train, y_train, X_test, y_test,
+            selected_models, 
+            optimize_hyperparams)
 
         st.session_state.trained_models = trained_models  # Saving the models to session state
         st.session_state.results = results
 
         st.write(results)
 
-        plot_evaluation_metrics(selected_models,
-                                X_test, y_test,
-                                VAR,
-                                task_type=task)
-
+        plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
