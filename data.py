@@ -89,6 +89,7 @@ def data_run():
                 st.sidebar.error(f"Error: {e}")
 
         existing_datasets = [
+            "redwankarimsony/heart-disease-data",
             "jillanisofttech/brain-stroke-dataset",
             "akshaydattatraykhare/diabetes-dataset",
             "fedesoriano/heart-failure-prediction",
