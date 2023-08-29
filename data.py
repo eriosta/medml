@@ -231,7 +231,6 @@ def handle_numeric_conditions(col, conditions_dict):
         # Ask for user confirmation before renaming the column
         if st.button("Confirm column name"):
             st.write(f"Column {new_col_name} added to the DataFrame.")
-            st.write(st.session_state.temp_df.head())
         
     except Exception as e:
         st.warning(f"An error occurred while processing the conditions. Error: {e}")
