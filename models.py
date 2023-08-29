@@ -210,6 +210,8 @@ def display_data_option():
     
 def select_training_parameters():
     """Return target variable, training variables, and categorical features."""
+  if 'df' in st.session_state:
+    
     VAR = st.selectbox("Select Target Variable", st.session_state.df.columns)
     training_vars = st.multiselect(
         "Select Variables for Training (excluding target)", 
@@ -219,6 +221,8 @@ def select_training_parameters():
         "Select Categorical Variables to Encode", training_vars
     )
     return VAR, training_vars, categorical_features
+  else:
+    st.warning(("Please load data source under **Data** first")
 
 def choose_train_test_sizes():
     """Return train and test set sizes."""
