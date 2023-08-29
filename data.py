@@ -171,21 +171,24 @@ def add_column_based_on_conditions():
     st.subheader("Add Column Based on Conditions")
     condition_columns = st.multiselect("Select columns for conditions:", st.session_state.temp_df.columns)
     
-    if condition_columns:
-        conditions = []
-        outputs = []
+    if not condition_columns:
+        st.warning("No columns selected. Please select at least one column to avoid errors.")
+        return
     
-        for col in condition_columns:
-            col_dtype = st.session_state.temp_df[col].dtype
+    conditions = []
+    outputs = []
     
-            # A dictionary to store conditions and their corresponding output values for each column
-            conditions_dict = {}
+    for col in condition_columns:
+        col_dtype = st.session_state.temp_df[col].dtype
+    
+        # A dictionary to store conditions and their corresponding output values for each column
+        conditions_dict = {}
             
-            # For numeric types
-            if np.issubdtype(col_dtype, np.number):
-                conditions_dict = handle_numeric_conditions(col, conditions_dict)
-            else:
-                st.warning(f"No predefined conditions for data type {col_dtype}")
+        # For numeric types
+        if np.issubdtype(col_dtype, np.number):
+            conditions_dict = handle_numeric_conditions(col, conditions_dict)
+        else:
+            st.warning(f"No predefined conditions for data type {col_dtype}")
     return conditions_dict
 
 def handle_numeric_conditions(col, conditions_dict):
