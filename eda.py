@@ -5,7 +5,7 @@ def st_profile_report(report):
     with st.spinner('Rendering report...'):
         st.components.v1.html(report.to_html(), height=600, width=800)
 
-def generate_eda(df):
+def generate_eda():
     if 'df' in st.session_state:
         df = st.session_state.df
         st.write("Generating EDA report...")
