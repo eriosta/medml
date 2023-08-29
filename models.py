@@ -230,71 +230,70 @@ def choose_train_test_sizes():
 from sklearn.utils.class_weight import compute_class_weight
 
 def train():
-   
-      display_data_option()
-
+  
       if st.session_state.df is None:
         st.warning("Data not loaded. Please load the data first.")
-        break
-
-      VAR, training_vars, categorical_features = select_training_parameters()
-      test_size = choose_train_test_sizes()
-      
-      X_train, X_test, y_train, y_test = prepare_data(
-          st.session_state.df, VAR, training_vars, categorical_features, test_size
-      )
-      st.session_state['data_split'] = (X_train, X_test, y_train, y_test)
-      
-      model_selection = st.multiselect(
-          "Select Models", 
-          ["Logistic Regression", "Gradient Boosting Classifier"]
-      )
-      
-      balance_class_weights = st.checkbox("Balance Class Weights?")
-      
-      if balance_class_weights:
-          neg, pos = np.bincount(y_train)
-          scale_pos_weight_value = neg / pos
       else:
-          scale_pos_weight_value = 1
-      
-      optimize_hyperparams = st.checkbox("Optimize Hyperparameters?")
-      
-      selected_models = {}
-      all_models = {
-          'Logistic Regression': LogisticRegression(class_weight='balanced' if balance_class_weights else None),
-          'Random Forest Classifier': RandomForestClassifier(class_weight='balanced' if balance_class_weights else None),
-          'Gradient Boosting Classifier': XGBClassifier(use_label_encoder=False, eval_metric='logloss', scale_pos_weight=scale_pos_weight_value),
-          'Decision Tree Classifier': DecisionTreeClassifier(class_weight='balanced' if balance_class_weights else None)
-      }
-      
-      for model in model_selection:
-          base_model = all_models[model]
-          if optimize_hyperparams:
-              user_defined_params = get_model_hyperparameters(model)  # Get user-defined hyperparameters
-              base_model.set_params(**user_defined_params)           # Update base model with those hyperparameters
-          selected_models[model] = base_model
-      
-      if st.button("Train Models"):
-          results, trained_models = train_and_evaluate_models(
-              X_train, y_train, X_test, y_test, selected_models)
-      
-          st.session_state.trained_models = trained_models  # Saving the models to session state
-          st.session_state.results = results
-      
-          st.write(results)
-      
-          plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
-      
-          # Compute AUC for each model and find the best one
-          results['AUC'] = [roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]) for model in trained_models.values()]
-          best_model_name = results['Method'][results['AUC'].idxmax()]
-          
-          # User model selection for SHAP
-          selected_model_for_shap = st.selectbox(
-              "Choose a model for SHAP analysis:",
-              options=list(trained_models.keys()),
-              index=list(trained_models.keys()).index(best_model_name)  # Default to the best model
-          )
-          
-          perform_shap(trained_models, selected_model_for_shap, X_train, X_test)
+        display_data_option()
+
+        VAR, training_vars, categorical_features = select_training_parameters()
+        test_size = choose_train_test_sizes()
+        
+        X_train, X_test, y_train, y_test = prepare_data(
+            st.session_state.df, VAR, training_vars, categorical_features, test_size
+        )
+        st.session_state['data_split'] = (X_train, X_test, y_train, y_test)
+        
+        model_selection = st.multiselect(
+            "Select Models", 
+            ["Logistic Regression", "Gradient Boosting Classifier"]
+        )
+        
+        balance_class_weights = st.checkbox("Balance Class Weights?")
+        
+        if balance_class_weights:
+            neg, pos = np.bincount(y_train)
+            scale_pos_weight_value = neg / pos
+        else:
+            scale_pos_weight_value = 1
+        
+        optimize_hyperparams = st.checkbox("Optimize Hyperparameters?")
+        
+        selected_models = {}
+        all_models = {
+            'Logistic Regression': LogisticRegression(class_weight='balanced' if balance_class_weights else None),
+            'Random Forest Classifier': RandomForestClassifier(class_weight='balanced' if balance_class_weights else None),
+            'Gradient Boosting Classifier': XGBClassifier(use_label_encoder=False, eval_metric='logloss', scale_pos_weight=scale_pos_weight_value),
+            'Decision Tree Classifier': DecisionTreeClassifier(class_weight='balanced' if balance_class_weights else None)
+        }
+        
+        for model in model_selection:
+            base_model = all_models[model]
+            if optimize_hyperparams:
+                user_defined_params = get_model_hyperparameters(model)  # Get user-defined hyperparameters
+                base_model.set_params(**user_defined_params)           # Update base model with those hyperparameters
+            selected_models[model] = base_model
+        
+        if st.button("Train Models"):
+            results, trained_models = train_and_evaluate_models(
+                X_train, y_train, X_test, y_test, selected_models)
+        
+            st.session_state.trained_models = trained_models  # Saving the models to session state
+            st.session_state.results = results
+        
+            st.write(results)
+        
+            plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
+        
+            # Compute AUC for each model and find the best one
+            results['AUC'] = [roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]) for model in trained_models.values()]
+            best_model_name = results['Method'][results['AUC'].idxmax()]
+            
+            # User model selection for SHAP
+            selected_model_for_shap = st.selectbox(
+                "Choose a model for SHAP analysis:",
+                options=list(trained_models.keys()),
+                index=list(trained_models.keys()).index(best_model_name)  # Default to the best model
+            )
+            
+            perform_shap(trained_models, selected_model_for_shap, X_train, X_test)
