@@ -270,4 +270,3 @@ def transform():
 
     if "df" not in st.session_state or st.session_state.df is None:
         st.warning("Go to Data section to start")
-        
