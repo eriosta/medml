@@ -230,8 +230,7 @@ def choose_train_test_sizes():
 from sklearn.utils.class_weight import compute_class_weight
 
 def train():
-  if 'df' in st.session_state:
-    
+   
       display_data_option()
       
       VAR, training_vars, categorical_features = select_training_parameters()
@@ -295,5 +294,3 @@ def train():
           )
           
           perform_shap(trained_models, selected_model_for_shap, X_train, X_test)
-  else:
-    st.warning("Please load data source under **Data** first")
