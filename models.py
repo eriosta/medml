@@ -208,9 +208,7 @@ def display_data_option():
     """Option to display a head of the data."""
     if st.checkbox("View data? (Head Only)"):
         st.dataframe(st.session_state.df.head())
-    else:
-      st.warning("Please load data source under **Data** first")
-
+    
 def select_training_parameters():
     """Return target variable, training variables, and categorical features."""
     VAR = st.selectbox("Select Target Variable", st.session_state.df.columns)
@@ -233,6 +231,9 @@ def choose_train_test_sizes():
 from sklearn.utils.class_weight import compute_class_weight
 
 def train():
+
+  if st.session_state.df:
+    
     display_data_option()
     
     VAR, training_vars, categorical_features = select_training_parameters()
@@ -296,3 +297,5 @@ def train():
         )
         
         perform_shap(trained_models, selected_model_for_shap, X_train, X_test)
+  else:
+    st.warning("Please load data source under **Data** first")
