@@ -203,7 +203,6 @@ def perform_shap(models, selected_model_name, X_train, X_test):
         st.pyplot(plt.gcf())
         plt.close()
 
-
 def display_data_option():
     """Option to display a head of the data."""
     if st.checkbox("View data? (Head Only)"):
@@ -232,7 +231,7 @@ from sklearn.utils.class_weight import compute_class_weight
 
 def train():
   
-  if st.session_state.df:
+  if 'df' in st.session_state:
     
     display_data_option()
     
