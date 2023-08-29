@@ -208,6 +208,8 @@ def display_data_option():
     """Option to display a head of the data."""
     if st.checkbox("View data? (Head Only)"):
         st.dataframe(st.session_state.df.head())
+    else:
+      st.warning("Please load data source under **Data** first")
 
 def select_training_parameters():
     """Return target variable, training variables, and categorical features."""
