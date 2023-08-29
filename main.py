@@ -1,129 +1,125 @@
 import streamlit as st
+import streamlit_toggle as tog
 from data import data_run, transform
 from eda import generate_eda
-from models import train
+import pandas as pd
+import os
+from models import train, perform_shap, prepare_data, train_and_evaluate_models, plot_evaluation_metrics, get_model_hyperparameters, LogisticRegression, RandomForestClassifier, XGBClassifier, DecisionTreeClassifier
 from learn import show
 from chat import llama2
 
+st.sidebar.title("MEDML")
 
-class MEDMLApp:
-    def __init__(self):
-        self._init_session_state()
-        st.sidebar.title("MEDML")
-        self._display_dataset_info()
-        self.navigate()
+# Initialize dataset and dataset name in session state
+if 'df' not in st.session_state:
+    st.session_state.df = None
+    st.session_state.dataset_name = None  # Add a state to store the dataset name
 
-    def _init_session_state(self):
-        if 'df' not in st.session_state:
-            st.session_state.df = None
-            st.session_state.dataset_name = None
+# Display the currently loaded dataset information on the sidebar
+if st.session_state.dataset_name:
+    st.sidebar.markdown(f"📊 **Loaded Dataset:** {st.session_state.dataset_name}")
+else:
+    st.sidebar.info("No dataset currently loaded")
 
-    def _display_dataset_info(self):
-        if st.session_state.dataset_name:
-            st.sidebar.markdown(f"📊 **Loaded Dataset:** {st.session_state.dataset_name}")
-        else:
-            st.sidebar.info("No dataset currently loaded")
+nav = st.sidebar.radio("Start Building", ["Get Started","Data", "Models", "Extra"])
 
-    def navigate(self):
-        nav = st.sidebar.radio("Start Building", ["Get Started", "Data", "Models", "Extra"])
+if nav == "Get Started":
+    st.markdown("""
+    # Welcome to MEDML!
+    ### A Machine Learning Primer Built By Physicians For Physicians.
 
-        if nav == "Get Started":
-            GetStartedPage()
-        elif nav == "Data":
-            DataPage()
-        elif nav == "Models":
-            ModelsPage()
-        elif nav == "Extra":
-            ExtraPage()
+    MEDML makes machine learning in medicine accessible to all.
 
-class GetStartedPage:
-    def __init__(self):
-        self.render()
+    ### 1. Data Source 📊
 
-    def render(self):
-        # Main Title and Logo (if available)
-        # st.image("path_to_your_logo.png", use_column_width=True)  # Optional: Include your logo at the top
-        st.title("MEDML: A Machine Learning Primer Built By Physicians For Physicians.")
-        st.write("Embark on a hands-on journey into the world of machine learning, tailored for physicians.")
+    **Kaggle:** 
+    - Community-driven datasets platform.
+    - New? Sign up on [Kaggle](https://www.kaggle.com/).
+    - For MEDML access: Profile (top right) -> 'Account' -> `API` -> `Create New API Token`. Use "username" and "key" from downloaded file here.
+    
+    **Upload CSV:** 
+    - Ensure your data is in CSV format.
+    - Use 'Upload CSV' to input.
 
-        # Section: Data Journey
-        st.subheader("📊 Data Mastery")
-        st.write("""
-        - **Import & Understand**: Fetch datasets directly from Kaggle or upload your own in CSV format.
-        - **Transform & Clean**: Prep your data for analysis with intuitive tools.
-        - **Analyze**: Dive deep into your data with exploratory data analysis.
-        """)
+    ### 2. Explore Trends  🔍
 
-        # Section: Machine Learning
-        st.subheader("🧠 Machine Learning Essentials")
-        st.write("""
-        - **Train & Test**: Build and evaluate classical ML models effortlessly.
-        - **Optimization**: Tune hyperparameters for better accuracy.
-        - **Explanation**: Understand model decisions with SHAP values.
-        """)
+    After uploading, check 'Exploratory Data Analysis' for:
+    - Dataset overview.
+    - Visualization insights.
 
-        # Section: Learning & Advanced AI
-        st.subheader("🚀 Elevate Your ML Knowledge")
-        st.write("""
-        - **Learn the Basics**: Comprehensive resources to solidify your foundation.
-        - **Explore Generative AI**: Delve into advanced AI techniques with guided examples.
-        """)
+    ### 3. Model, Predict and Evaluate 🧠
 
-        # Disclaimer and Call to Action
-        st.markdown("---")
-        st.info("""
-        Remember: MEDML is a tool to aid understanding. It doesn't replace clinical judgment or decision-making.
-        Ready to dive in? Use the sidebar to start your ML journey!
-        """)
+    - **Target**: Define the outcome.
+    - **Variables**: List influencing factors.
+    - **Predictor**: Pick one or more; MEDML handles the details.
+    - **Optimize Hyperparameters**: Enhance prediction accuracy.
 
-        # Footer (Optional: Include contact info or other details)
-        st.markdown("""
-        Questions or feedback? [Contact us]().
-        """)
+    ---
 
-class DataPage:
-    def __init__(self):
-        self.sub_navigation()
+    MEDML aids, but doesn't replace, medical judgment. Need help? [Contact us]().
+    """)
 
-    def sub_navigation(self):
-        data_page = st.sidebar.radio("Navigate", ['Source', 'Exploratory Analysis', 'Transformation'])
-        if data_page == 'Source':
+    st.markdown("Use the sidebar to start with MEDML!")
+
+elif nav == "Data":
+    # Add a sub-page for model explanation in the sidebar using radio buttons
+    data_page = st.sidebar.radio("Navigate", ['Source', 'Exploratory Analysis','Transformation'])
+
+    if data_page == 'Source':
             data_run()
-        elif data_page == "Exploratory Analysis":
-            generate_eda
-        elif data_page == "Transformation":
-            transform()
 
-class ModelsPage:
-    def __init__(self):
-        self.sub_navigation()
+    elif data_page == "Exploratory Analysis":
+        if st.session_state.df is not None:
+            try:
+                report_data = generate_eda(st.session_state.df)
+                st.sidebar.download_button(
+                    label="Download EDA Report",
+                    data=report_data,
+                    file_name="EDA.html",
+                    mime="text/html"
+                )
+            except Exception as e:
+                st.error(f"Error generating report: {e}")
+        else:
+            st.warning("Please upload a dataset under **Data** first.")
+    elif data_page == "Transformation":
+         transform()
+        
+elif nav == "Models":
 
-    def sub_navigation(self):
+    if st.session_state.df is not None:
+        # Add a sub-page for model explanation in the sidebar using radio button
         model_page = st.sidebar.radio("Navigate", ['Train & Evaluate', 'Explain'])
+     
         if model_page == 'Train & Evaluate':
             train()
-        elif model_page == 'Explain':
-            self.model_explanation()
+            
+        if model_page == 'Explain':
 
-    def model_explanation(self):
-        # Code specific to Model Explanation
-        pass
+            if 'trained_models' in st.session_state:
 
-class ExtraPage:
-    def __init__(self):
-        self.sub_navigation()
+                trained_models = st.session_state.trained_models
+                X_train, X_test, y_train, y_test = st.session_state['data_split']
+                results = st.session_state['results']
+               
+                perform_shap(trained_models,
+                                X_train, X_test, y_test,
+                                results)
+            else:
+                st.warning("Please train a model under Train & Evaluate first.")
 
-    def sub_navigation(self):
-        nav2 = st.sidebar.radio("Extra", ["Learn", "Generative AI"])
-        if nav2 == "Learn":
-            show()
-        elif nav2 == "Generative AI":
-            self.handle_generative_ai()
+    else:
+        st.warning("Please upload a dataset under **Data** first.")
 
-    def handle_generative_ai(self):
+if nav == "Extra":
+    nav2 = st.sidebar.radio("Extra", ["Learn","Generative AI"])
+
+    if nav2 == "Learn":
+        show()
+
+    if nav2 == "Generative AI":
+        # Sidebar Navigation
         navigation = st.sidebar.radio('Navigation', ['Llama2'])
+
         if navigation == 'Llama2':
             llama2()
-
-# Run the main app
-MEDMLApp()
