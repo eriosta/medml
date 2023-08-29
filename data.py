@@ -227,8 +227,10 @@ def transform():
                             filtered_df = st.session_state.temp_df.query(condition_str)
                             st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
                         
-                        st.write(f"Column {new_col_name} added to the DataFrame.")
-                        st.write(st.session_state.temp_df.head())
+                        # Ask for user confirmation before renaming the column
+                        if st.button("Confirm column name"):
+                            st.write(f"Column {new_col_name} added to the DataFrame.")
+                            st.write(st.session_state.temp_df.head())
                         
                     except Exception as e:
                         st.warning(f"An error occurred while processing the conditions. Error: {e}")
