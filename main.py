@@ -90,7 +90,7 @@ class DataPage:
         if data_page == 'Source':
             data_run()
         elif data_page == "Exploratory Analysis":
-            generate_eda
+            generate_eda()
         elif data_page == "Transformation":
             transform()
 
