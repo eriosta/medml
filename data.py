@@ -167,6 +167,126 @@ def data_run():
             st.session_state.dataset_name = uploaded_file.name  # store actual filename to session state
             st.write(st.session_state.df)
 
+def add_column_based_on_conditions():
+    st.subheader("Add Column Based on Conditions")
+    condition_columns = st.multiselect("Select columns for conditions:", st.session_state.temp_df.columns)
+    
+    if condition_columns:
+        conditions = []
+        outputs = []
+    
+        for col in condition_columns:
+            col_dtype = st.session_state.temp_df[col].dtype
+    
+            # A dictionary to store conditions and their corresponding output values for each column
+            conditions_dict = {}
+            
+            # For numeric types
+            if np.issubdtype(col_dtype, np.number):
+                conditions_dict = handle_numeric_conditions(col, conditions_dict)
+            else:
+                st.warning(f"No predefined conditions for data type {col_dtype}")
+    return conditions_dict
+
+def handle_numeric_conditions(col, conditions_dict):
+    # Create a condition-input mechanism for the selected column
+    num_conditions = st.session_state.get("num_conditions", 1)
+    
+    for i in range(num_conditions):
+        condition = st.text_input(f"Condition {i+1} for {col} (e.g., > 50):")
+        output_value = st.text_input(f"Output value for condition {condition}:")
+        
+        # Validate the condition and output value before storing them
+        try:
+            dummy_df = pd.DataFrame({col: [0]})
+            dummy_df.query(f"{col} {condition}")
+            conditions_dict[condition] = float(output_value)
+        except:
+            st.warning(f"Invalid condition {condition} or output value {output_value} for column {col}.")
+    
+    # Allow user to add more conditions
+    if st.button("+ Add Another Condition"):
+        st.session_state.num_conditions += 1
+        
+    # Apply conditions to the dataframe
+    else_output_value = st.text_input(f"Default output value if NO conditions are met:")
+    
+    try:
+        # Allow user to name the new column, otherwise let the default occur
+        new_col_name = st.text_input("Enter new column name:", f"{col}_new")
+        
+        # Check if the new column already exists in the DataFrame
+        if new_col_name not in st.session_state.temp_df.columns:
+            # Initializing the new column with the default value
+            st.session_state.temp_df[new_col_name] = float(else_output_value)
+        
+        for condition, value in conditions_dict.items():
+            condition_str = f"`{col}` {condition}"
+            filtered_df = st.session_state.temp_df.query(condition_str)
+            st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
+        
+        # Ask for user confirmation before renaming the column
+        if st.button("Confirm column name"):
+            st.write(f"Column {new_col_name} added to the DataFrame.")
+            st.write(st.session_state.temp_df.head())
+        
+    except Exception as e:
+        st.warning(f"An error occurred while processing the conditions. Error: {e}")
+    return conditions_dict
+
+def transform_data():
+    st.subheader("Transform Data")
+    cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.df.columns)
+    
+    if cols_to_transform:
+        # Detect the data type of the first selected column (for simplicity)
+        col_dtype = st.session_state.df[cols_to_transform[0]].dtype
+    
+        if np.issubdtype(col_dtype, np.number):  # if numeric
+            apply_numeric_transformation(cols_to_transform)
+    
+        st.write("Transformed Data:")
+        st.write(st.session_state.temp_df.head())
+
+def apply_numeric_transformation(cols_to_transform):
+    transform_type = st.selectbox("Transformation type:", ["Log", "Square root", "Custom (x^2)"])
+    if st.button("Apply Numeric Transformation"):
+        for col in cols_to_transform:
+            # Allow user to name the new column, otherwise let the default occur
+            new_col_name = st.text_input("Enter new column name:", f"{col}_transformed")
+            if transform_type == "Log":
+                st.session_state.temp_df[new_col_name] = np.log1p(st.session_state.temp_df[col])
+            elif transform_type == "Square root":
+                st.session_state.temp_df[new_col_name] = np.sqrt(st.session_state.temp_df[col])
+            else:
+                st.session_state.temp_df[new_col_name] = st.session_state.temp_df[col]**2
+
+def one_hot_encoding():
+    st.subheader("One-Hot Encoding")
+    cols_to_encode = st.multiselect("Select categorical columns to one-hot encode:", st.session_state.temp_df.columns)
+    if st.button("One-Hot Encode"):
+        st.session_state.temp_df = pd.get_dummies(st.session_state.temp_df, columns=cols_to_encode)
+        st.write("One-Hot Encoded Data:")
+        st.write(st.session_state.temp_df.head())
+
+def save_changes():
+    # Button to save changes
+    if st.button("Save Changes"):
+        st.session_state.df = st.session_state.temp_df.copy()
+        st.success("Changes saved successfully!")
+        st.write("Modified DataFrame:")
+        st.write(st.session_state.df.head())
+        st.info(f"Changes made to the DataFrame: \n\nAdded columns: {list(set(st.session_state.df.columns) - set(st.session_state.temp_df.columns))}\n\nTransformed columns: {cols_to_transform}\n\nOne-Hot Encoded columns: {cols_to_encode}")
+
+def download_processed_data():
+    # Download Processed Data
+    st.subheader("Download Processed Data")
+    if st.button("Download"):
+        csv = st.session_state.df.to_csv(index=False)
+        b64 = base64.b64encode(csv.encode()).decode()
+        href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download Processed Data as CSV</a>'
+        st.markdown(href, unsafe_allow_html=True)
+
 def transform():
     # st.warning("Under construction")
     if "df" in st.session_state:
@@ -174,116 +294,10 @@ def transform():
         if 'temp_df' not in st.session_state:
             st.session_state.temp_df = st.session_state.df.copy()
 
-        # Add Column Based on Conditions
-        st.subheader("Add Column Based on Conditions")
-        condition_columns = st.multiselect("Select columns for conditions:", st.session_state.temp_df.columns)
-    
-        if condition_columns:
-            conditions = []
-            outputs = []
-    
-            for col in condition_columns:
-                col_dtype = st.session_state.temp_df[col].dtype
-    
-                # A dictionary to store conditions and their corresponding output values for each column
-                conditions_dict = {}
-                
-                # For numeric types
-                if np.issubdtype(col_dtype, np.number):
-                    
-                    # Create a condition-input mechanism for the selected column
-                    num_conditions = st.session_state.get("num_conditions", 1)
-                    
-                    for i in range(num_conditions):
-                        condition = st.text_input(f"Condition {i+1} for {col} (e.g., > 50):")
-                        output_value = st.text_input(f"Output value for condition {condition}:")
-                        
-                        # Validate the condition and output value before storing them
-                        try:
-                            dummy_df = pd.DataFrame({col: [0]})
-                            dummy_df.query(f"{col} {condition}")
-                            conditions_dict[condition] = float(output_value)
-                        except:
-                            st.warning(f"Invalid condition {condition} or output value {output_value} for column {col}.")
-                    
-                    # Allow user to add more conditions
-                    if st.button("+ Add Another Condition"):
-                        st.session_state.num_conditions += 1
-                        
-                    # Apply conditions to the dataframe
-                    else_output_value = st.text_input(f"Default output value if NO conditions are met:")
-                    
-                    try:
-                        # Allow user to name the new column, otherwise let the default occur
-                        new_col_name = st.text_input("Enter new column name:", f"{col}_new")
-                        
-                        # Check if the new column already exists in the DataFrame
-                        if new_col_name not in st.session_state.temp_df.columns:
-                            # Initializing the new column with the default value
-                            st.session_state.temp_df[new_col_name] = float(else_output_value)
-                        
-                        for condition, value in conditions_dict.items():
-                            condition_str = f"`{col}` {condition}"
-                            filtered_df = st.session_state.temp_df.query(condition_str)
-                            st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
-                        
-                        # Ask for user confirmation before renaming the column
-                        if st.button("Confirm column name"):
-                            st.write(f"Column {new_col_name} added to the DataFrame.")
-                            st.write(st.session_state.temp_df.head())
-                        
-                    except Exception as e:
-                        st.warning(f"An error occurred while processing the conditions. Error: {e}")
-                   
-                else:
-                    st.warning(f"No predefined conditions for data type {col_dtype}")
-        
-        # Transformations
-        st.subheader("Transform Data")
-        cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.df.columns)
-        
-        if cols_to_transform:
-            # Detect the data type of the first selected column (for simplicity)
-            col_dtype = st.session_state.df[cols_to_transform[0]].dtype
-    
-            if np.issubdtype(col_dtype, np.number):  # if numeric
-                transform_type = st.selectbox("Transformation type:", ["Log", "Square root", "Custom (x^2)"])
-                if st.button("Apply Numeric Transformation"):
-                    for col in cols_to_transform:
-                        # Allow user to name the new column, otherwise let the default occur
-                        new_col_name = st.text_input("Enter new column name:", f"{col}_transformed")
-                        if transform_type == "Log":
-                            st.session_state.temp_df[new_col_name] = np.log1p(st.session_state.temp_df[col])
-                        elif transform_type == "Square root":
-                            st.session_state.temp_df[new_col_name] = np.sqrt(st.session_state.temp_df[col])
-                        else:
-                            st.session_state.temp_df[new_col_name] = st.session_state.temp_df[col]**2
-    
-            st.write("Transformed Data:")
-            st.write(st.session_state.temp_df.head())
-        
-        # One-Hot Encoding
-        st.subheader("One-Hot Encoding")
-        cols_to_encode = st.multiselect("Select categorical columns to one-hot encode:", st.session_state.temp_df.columns)
-        if st.button("One-Hot Encode"):
-            st.session_state.temp_df = pd.get_dummies(st.session_state.temp_df, columns=cols_to_encode)
-            st.write("One-Hot Encoded Data:")
-            st.write(st.session_state.temp_df.head())
-        
-        # Button to save changes
-        if st.button("Save Changes"):
-            st.session_state.df = st.session_state.temp_df.copy()
-            st.success("Changes saved successfully!")
-            st.write("Modified DataFrame:")
-            st.write(st.session_state.df.head())
-            st.info(f"Changes made to the DataFrame: \n\nAdded columns: {list(set(st.session_state.df.columns) - set(st.session_state.temp_df.columns))}\n\nTransformed columns: {cols_to_transform}\n\nOne-Hot Encoded columns: {cols_to_encode}")
-        
-        # Download Processed Data
-        st.subheader("Download Processed Data")
-        if st.button("Download"):
-            csv = st.session_state.df.to_csv(index=False)
-            b64 = base64.b64encode(csv.encode()).decode()
-            href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download Processed Data as CSV</a>'
-            st.markdown(href, unsafe_allow_html=True)
+        conditions_dict = add_column_based_on_conditions()
+        transform_data()
+        one_hot_encoding()
+        save_changes()
+        download_processed_data()
     else:
         st.warning("Go to Data section to start")
