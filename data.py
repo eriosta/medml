@@ -237,41 +237,6 @@ def handle_numeric_conditions(col, conditions_dict):
         st.warning(f"An error occurred while processing the conditions. Error: {e}")
     return conditions_dict
 
-def transform_data():
-    st.subheader("Transform Data")
-    cols_to_transform = st.multiselect("Select columns to transform:", st.session_state.df.columns)
-    
-    if cols_to_transform:
-        # Detect the data type of the first selected column (for simplicity)
-        col_dtype = st.session_state.df[cols_to_transform[0]].dtype
-    
-        if np.issubdtype(col_dtype, np.number):  # if numeric
-            apply_numeric_transformation(cols_to_transform)
-    
-        st.write("Transformed Data:")
-        st.write(st.session_state.temp_df.head())
-
-def apply_numeric_transformation(cols_to_transform):
-    transform_type = st.selectbox("Transformation type:", ["Log", "Square root", "Custom (x^2)"])
-    if st.button("Apply Numeric Transformation"):
-        for col in cols_to_transform:
-            # Allow user to name the new column, otherwise let the default occur
-            new_col_name = st.text_input("Enter new column name:", f"{col}_transformed")
-            if transform_type == "Log":
-                st.session_state.temp_df[new_col_name] = np.log1p(st.session_state.temp_df[col])
-            elif transform_type == "Square root":
-                st.session_state.temp_df[new_col_name] = np.sqrt(st.session_state.temp_df[col])
-            else:
-                st.session_state.temp_df[new_col_name] = st.session_state.temp_df[col]**2
-
-def one_hot_encoding():
-    st.subheader("One-Hot Encoding")
-    cols_to_encode = st.multiselect("Select categorical columns to one-hot encode:", st.session_state.temp_df.columns)
-    if st.button("One-Hot Encode"):
-        st.session_state.temp_df = pd.get_dummies(st.session_state.temp_df, columns=cols_to_encode)
-        st.write("One-Hot Encoded Data:")
-        st.write(st.session_state.temp_df.head())
-
 def save_changes():
     # Button to save changes
     if st.button("Save Changes"):
@@ -279,7 +244,7 @@ def save_changes():
         st.success("Changes saved successfully!")
         st.write("Modified DataFrame:")
         st.write(st.session_state.df.head())
-        st.info(f"Changes made to the DataFrame: \n\nAdded columns: {list(set(st.session_state.df.columns) - set(st.session_state.temp_df.columns))}\n\nTransformed columns: {cols_to_transform}\n\nOne-Hot Encoded columns: {cols_to_encode}")
+        st.info(f"Changes made to the DataFrame: \n\nAdded columns: {list(set(st.session_state.df.columns) - set(st.session_state.temp_df.columns))}")
 
 def download_processed_data():
     # Download Processed Data
@@ -289,7 +254,6 @@ def download_processed_data():
         b64 = base64.b64encode(csv.encode()).decode()
         href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download Processed Data as CSV</a>'
         st.markdown(href, unsafe_allow_html=True)
-
 def transform():
     if "df" not in st.session_state or st.session_state.df is None:
         st.warning("DataFrame not initialized. Please load the data first.")
@@ -300,11 +264,10 @@ def transform():
         st.session_state.temp_df = st.session_state.df.copy()
 
     conditions_dict = add_column_based_on_conditions()
-    transform_data()
-    one_hot_encoding()
+
     save_changes()
     download_processed_data()
 
     if "df" not in st.session_state or st.session_state.df is None:
         st.warning("Go to Data section to start")
-
+        
