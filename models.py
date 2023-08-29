@@ -231,19 +231,19 @@ def choose_train_test_sizes():
 from sklearn.utils.class_weight import compute_class_weight
 
 def train():
-
+  
   if st.session_state.df:
     
     display_data_option()
     
     VAR, training_vars, categorical_features = select_training_parameters()
     test_size = choose_train_test_sizes()
-
+    
     X_train, X_test, y_train, y_test = prepare_data(
         st.session_state.df, VAR, training_vars, categorical_features, test_size
     )
     st.session_state['data_split'] = (X_train, X_test, y_train, y_test)
-
+    
     model_selection = st.multiselect(
         "Select Models", 
         ["Logistic Regression", "Gradient Boosting Classifier"]
@@ -256,9 +256,9 @@ def train():
         scale_pos_weight_value = neg / pos
     else:
         scale_pos_weight_value = 1
-
+    
     optimize_hyperparams = st.checkbox("Optimize Hyperparameters?")
-
+    
     selected_models = {}
     all_models = {
         'Logistic Regression': LogisticRegression(class_weight='balanced' if balance_class_weights else None),
@@ -266,25 +266,25 @@ def train():
         'Gradient Boosting Classifier': XGBClassifier(use_label_encoder=False, eval_metric='logloss', scale_pos_weight=scale_pos_weight_value),
         'Decision Tree Classifier': DecisionTreeClassifier(class_weight='balanced' if balance_class_weights else None)
     }
-
+    
     for model in model_selection:
         base_model = all_models[model]
         if optimize_hyperparams:
             user_defined_params = get_model_hyperparameters(model)  # Get user-defined hyperparameters
             base_model.set_params(**user_defined_params)           # Update base model with those hyperparameters
         selected_models[model] = base_model
-
+    
     if st.button("Train Models"):
         results, trained_models = train_and_evaluate_models(
             X_train, y_train, X_test, y_test, selected_models)
-
+    
         st.session_state.trained_models = trained_models  # Saving the models to session state
         st.session_state.results = results
-
+    
         st.write(results)
-
+    
         plot_evaluation_metrics(selected_models, X_test, y_test, VAR)
-
+    
         # Compute AUC for each model and find the best one
         results['AUC'] = [roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]) for model in trained_models.values()]
         best_model_name = results['Method'][results['AUC'].idxmax()]
