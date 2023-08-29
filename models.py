@@ -232,7 +232,10 @@ from sklearn.utils.class_weight import compute_class_weight
 def train():
    
       display_data_option()
-      
+
+      if st.session_state.df is None:
+        st.warning("Data not loaded. Please load the data first.")
+
       VAR, training_vars, categorical_features = select_training_parameters()
       test_size = choose_train_test_sizes()
       
