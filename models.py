@@ -230,7 +230,6 @@ def choose_train_test_sizes():
 from sklearn.utils.class_weight import compute_class_weight
 
 def train():
-  
   if 'df' in st.session_state:
     
     display_data_option()
