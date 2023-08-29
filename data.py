@@ -214,7 +214,8 @@ def transform():
                     else_output_value = st.text_input(f"Default output value if NO conditions are met:")
                     
                     try:
-                        new_col_name = f"{col}_new"
+                        # Allow user to name the new column, otherwise let the default occur
+                        new_col_name = st.text_input("Enter new column name:", f"{col}_new")
                         
                         # Initializing the new column with the default value
                         st.session_state.temp_df[new_col_name] = float(else_output_value)
@@ -245,12 +246,14 @@ def transform():
                 transform_type = st.selectbox("Transformation type:", ["Log", "Square root", "Custom (x^2)"])
                 if st.button("Apply Numeric Transformation"):
                     for col in cols_to_transform:
+                        # Allow user to name the new column, otherwise let the default occur
+                        new_col_name = st.text_input("Enter new column name:", f"{col}_transformed")
                         if transform_type == "Log":
-                            st.session_state.temp_df[col] = np.log1p(st.session_state.temp_df[col])
+                            st.session_state.temp_df[new_col_name] = np.log1p(st.session_state.temp_df[col])
                         elif transform_type == "Square root":
-                            st.session_state.temp_df[col] = np.sqrt(st.session_state.temp_df[col])
+                            st.session_state.temp_df[new_col_name] = np.sqrt(st.session_state.temp_df[col])
                         else:
-                            st.session_state.temp_df[col] = st.session_state.temp_df[col]**2
+                            st.session_state.temp_df[new_col_name] = st.session_state.temp_df[col]**2
     
             st.write("Transformed Data:")
             st.write(st.session_state.temp_df.head())
