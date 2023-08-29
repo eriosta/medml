@@ -101,7 +101,10 @@ class ModelsPage:
     def sub_navigation(self):
         model_page = st.sidebar.radio("Navigate", ['Train & Evaluate', 'Explain'])
         if model_page == 'Train & Evaluate':
-            train()
+            if df in st.session_state:
+                train()
+            else:
+                st.warning("Please load data source under **Data** first")
         elif model_page == 'Explain':
             st.warning("Under construction.")
 
