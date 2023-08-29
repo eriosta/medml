@@ -246,31 +246,14 @@ def transform():
                 if st.button("Apply Numeric Transformation"):
                     for col in cols_to_transform:
                         if transform_type == "Log":
-                            st.session_state.df[col] = np.log1p(st.session_state.df[col])
+                            st.session_state.temp_df[col] = np.log1p(st.session_state.temp_df[col])
                         elif transform_type == "Square root":
-                            st.session_state.df[col] = np.sqrt(st.session_state.df[col])
+                            st.session_state.temp_df[col] = np.sqrt(st.session_state.temp_df[col])
                         else:
-                            st.session_state.df[col] = st.session_state.df[col]**2
-    
-            elif np.issubdtype(col_dtype, np.object):  # if string/object
-                transform_type = st.selectbox("Transformation type:", ["Capitalize", "Lowercase", "Uppercase"])
-                if st.button("Apply String Transformation"):
-                    for col in cols_to_transform:
-                        if transform_type == "Capitalize":
-                            st.session_state.df[col] = st.session_state.df[col].str.capitalize()
-                        elif transform_type == "Lowercase":
-                            st.session_state.df[col] = st.session_state.df[col].str.lower()
-                        else:
-                            st.session_state.df[col] = st.session_state.df[col].str.upper()
-    
-            elif np.issubdtype(col_dtype, np.bool_):  # if boolean
-                # Add specific transformations for boolean columns if required
-                pass
-            else:
-                st.warning(f"No predefined transformations for data type {col_dtype}")
+                            st.session_state.temp_df[col] = st.session_state.temp_df[col]**2
     
             st.write("Transformed Data:")
-            st.write(st.session_state.df.head())
+            st.write(st.session_state.temp_df.head())
         
         # One-Hot Encoding
         st.subheader("One-Hot Encoding")
