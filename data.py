@@ -217,8 +217,10 @@ def transform():
                         # Allow user to name the new column, otherwise let the default occur
                         new_col_name = st.text_input("Enter new column name:", f"{col}_new")
                         
-                        # Initializing the new column with the default value
-                        st.session_state.temp_df[new_col_name] = float(else_output_value)
+                        # Check if the new column already exists in the DataFrame
+                        if new_col_name not in st.session_state.temp_df.columns:
+                            # Initializing the new column with the default value
+                            st.session_state.temp_df[new_col_name] = float(else_output_value)
                         
                         for condition, value in conditions_dict.items():
                             condition_str = f"`{col}` {condition}"
