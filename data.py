@@ -291,17 +291,20 @@ def download_processed_data():
         st.markdown(href, unsafe_allow_html=True)
 
 def transform():
-    # st.warning("Under construction")
-    if "df" in st.session_state:
-        # Create a temporary DataFrame to apply transformations
-        if 'temp_df' not in st.session_state:
-            st.session_state.temp_df = st.session_state.df.copy()
+    if "df" not in st.session_state or st.session_state.df is None:
+        st.warning("DataFrame not initialized. Please load the data first.")
+        return
 
-        conditions_dict = add_column_based_on_conditions()
-        transform_data()
-        one_hot_encoding()
-        save_changes()
-        download_processed_data()
-    else:
+    # Create a temporary DataFrame to apply transformations
+    if 'temp_df' not in st.session_state:
+        st.session_state.temp_df = st.session_state.df.copy()
+
+    conditions_dict = add_column_based_on_conditions()
+    transform_data()
+    one_hot_encoding()
+    save_changes()
+    download_processed_data()
+
+    if "df" not in st.session_state or st.session_state.df is None:
         st.warning("Go to Data section to start")
 
