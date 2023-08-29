@@ -267,6 +267,9 @@ def transform():
         if st.button("Save Changes"):
             st.session_state.df = st.session_state.temp_df.copy()
             st.success("Changes saved successfully!")
+            st.write("Modified DataFrame:")
+            st.write(st.session_state.df.head())
+            st.info(f"Changes made to the DataFrame: \n\nAdded columns: {list(set(st.session_state.df.columns) - set(st.session_state.temp_df.columns))}\n\nTransformed columns: {cols_to_transform}\n\nOne-Hot Encoded columns: {cols_to_encode}")
         
         # Download Processed Data
         st.subheader("Download Processed Data")
