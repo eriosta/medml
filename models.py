@@ -235,6 +235,7 @@ def train():
 
       if st.session_state.df is None:
         st.warning("Data not loaded. Please load the data first.")
+        break
 
       VAR, training_vars, categorical_features = select_training_parameters()
       test_size = choose_train_test_sizes()
