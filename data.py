@@ -188,13 +188,7 @@ def perform_knn_imputation():
                     st.session_state.temp_df[col] = imputer.fit_transform(st.session_state.df[[col]])
                     st.success(f"KNN imputation completed for {col}!")
                 except ValueError:
-                    st.warning(f"Cannot perform KNN imputation on {col} as it is not numeric.")
-                    if st.button(f"One-hot encode {col}?"):
-                        # Perform one-hot encoding
-                        encoded_df = pd.get_dummies(st.session_state.df[col], prefix=col)
-                        st.session_state.temp_df = pd.concat([st.session_state.temp_df, encoded_df], axis=1)
-                        st.session_state.temp_df.drop(columns=[col], inplace=True)
-                        st.success(f"One-hot encoding completed for {col}!")
+                    st.warning(f"Cannot perform KNN imputation on {col} as it is not numeric. Please select another column.")
         else:
             st.info("No columns selected for KNN imputation.")
     else:
