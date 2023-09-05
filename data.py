@@ -181,10 +181,20 @@ def perform_knn_imputation():
         columns_to_impute = st.multiselect("Select columns to impute", columns_with_nan)
 
         if columns_to_impute:
-            # Perform KNN imputation
-            imputer = KNNImputer(n_neighbors=5, weights='uniform', metric='nan_euclidean')
-            st.session_state.temp_df[columns_to_impute] = imputer.fit_transform(st.session_state.df[columns_to_impute])
-            st.success("KNN imputation completed!")
+            for col in columns_to_impute:
+                try:
+                    # Perform KNN imputation
+                    imputer = KNNImputer(n_neighbors=5, weights='uniform', metric='nan_euclidean')
+                    st.session_state.temp_df[col] = imputer.fit_transform(st.session_state.df[[col]])
+                    st.success(f"KNN imputation completed for {col}!")
+                except ValueError:
+                    st.warning(f"Cannot perform KNN imputation on {col} as it is not numeric.")
+                    if st.button(f"One-hot encode {col}?"):
+                        # Perform one-hot encoding
+                        encoded_df = pd.get_dummies(st.session_state.df[col], prefix=col)
+                        st.session_state.temp_df = pd.concat([st.session_state.temp_df, encoded_df], axis=1)
+                        st.session_state.temp_df.drop(columns=[col], inplace=True)
+                        st.success(f"One-hot encoding completed for {col}!")
         else:
             st.info("No columns selected for KNN imputation.")
     else:
