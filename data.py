@@ -177,6 +177,10 @@ def perform_knn_imputation():
         st.sidebar.markdown("The following columns have missing values and will be imputed using KNN:")
         st.sidebar.write(columns_with_nan)
 
+        # Perform one-hot encoding on non-numeric columns before KNN imputation
+        non_numeric_columns = st.session_state.df.select_dtypes(include=['object']).columns.tolist()
+        st.session_state.df = pd.get_dummies(st.session_state.df, columns=non_numeric_columns)
+
         # Perform KNN imputation
         imputer = KNNImputer(n_neighbors=5, weights='uniform', metric='nan_euclidean')
         st.session_state.df[columns_with_nan] = imputer.fit_transform(st.session_state.df[columns_with_nan])
