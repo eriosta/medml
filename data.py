@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 import base64
 import numpy as np
+from sklearn.impute import KNNImputer
 
 def setup_kaggle_env_variables(username, key):
     """Set up environment variables for Kaggle."""
@@ -167,6 +168,22 @@ def data_run():
             st.session_state.dataset_name = uploaded_file.name  # store actual filename to session state
             st.write(st.session_state.df)
 
+def perform_knn_imputation():
+    """Perform KNN imputation on select columns that meet criteria for having at least 1 missing value."""
+    # Select columns with at least 1 missing value
+    columns_with_nan = [col for col in st.session_state.df.columns if st.session_state.df[col].isnull().sum() > 0]
+    if columns_with_nan:
+        st.sidebar.markdown("### KNN Imputation")
+        st.sidebar.markdown("The following columns have missing values and will be imputed using KNN:")
+        st.sidebar.write(columns_with_nan)
+
+        # Perform KNN imputation
+        imputer = KNNImputer(n_neighbors=5, weights='uniform', metric='nan_euclidean')
+        st.session_state.df[columns_with_nan] = imputer.fit_transform(st.session_state.df[columns_with_nan])
+        st.sidebar.success("KNN imputation completed!")
+    else:
+        st.sidebar.info("No columns with missing values found for KNN imputation.")
+
 def add_column_based_on_conditions():
     st.subheader("Add Column Based on Conditions")
     condition_columns = st.multiselect("Select columns for conditions:", st.session_state.temp_df.columns)
@@ -262,6 +279,7 @@ def transform():
     if 'temp_df' not in st.session_state:
         st.session_state.temp_df = st.session_state.df.copy()
 
+    perform_knn_imputation()
     conditions_dict = add_column_based_on_conditions()
 
     save_changes()

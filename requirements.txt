@@ -9,3 +9,4 @@ pandasai
 matplotlib
 openai
 bs4
+scikit-learn
