@@ -174,17 +174,19 @@ def perform_knn_imputation():
     columns_with_nan = [col for col in st.session_state.df.columns if st.session_state.df[col].isnull().sum() > 0]
     if columns_with_nan:
         st.sidebar.markdown("### KNN Imputation")
-        st.sidebar.markdown("The following columns have missing values and will be imputed using KNN:")
+        st.sidebar.markdown("The following columns have missing values and can be imputed using KNN:")
         st.sidebar.write(columns_with_nan)
 
-        # Perform one-hot encoding on non-numeric columns before KNN imputation
-        non_numeric_columns = st.session_state.df.select_dtypes(include=['object']).columns.tolist()
-        st.session_state.df = pd.get_dummies(st.session_state.df, columns=non_numeric_columns)
+        # Let the user select which columns to impute
+        columns_to_impute = st.sidebar.multiselect("Select columns to impute", columns_with_nan)
 
-        # Perform KNN imputation
-        imputer = KNNImputer(n_neighbors=5, weights='uniform', metric='nan_euclidean')
-        st.session_state.df[columns_with_nan] = imputer.fit_transform(st.session_state.df[columns_with_nan])
-        st.sidebar.success("KNN imputation completed!")
+        if columns_to_impute:
+            # Perform KNN imputation
+            imputer = KNNImputer(n_neighbors=5, weights='uniform', metric='nan_euclidean')
+            st.session_state.df[columns_to_impute] = imputer.fit_transform(st.session_state.df[columns_to_impute])
+            st.sidebar.success("KNN imputation completed!")
+        else:
+            st.sidebar.info("No columns selected for KNN imputation.")
     else:
         st.sidebar.info("No columns with missing values found for KNN imputation.")
 
@@ -291,3 +293,4 @@ def transform():
 
     if "df" not in st.session_state or st.session_state.df is None:
         st.warning("Go to Data section to start")
+
