@@ -173,22 +173,22 @@ def perform_knn_imputation():
     # Select columns with at least 1 missing value
     columns_with_nan = [col for col in st.session_state.df.columns if st.session_state.df[col].isnull().sum() > 0]
     if columns_with_nan:
-        st.sidebar.markdown("### KNN Imputation")
-        st.sidebar.markdown("The following columns have missing values and can be imputed using KNN:")
-        st.sidebar.write(columns_with_nan)
+        st.markdown("### KNN Imputation")
+        st.markdown("The following columns have missing values and can be imputed using KNN:")
+        st.write(columns_with_nan)
 
         # Let the user select which columns to impute
-        columns_to_impute = st.sidebar.multiselect("Select columns to impute", columns_with_nan)
+        columns_to_impute = st.multiselect("Select columns to impute", columns_with_nan)
 
         if columns_to_impute:
             # Perform KNN imputation
             imputer = KNNImputer(n_neighbors=5, weights='uniform', metric='nan_euclidean')
-            st.session_state.df[columns_to_impute] = imputer.fit_transform(st.session_state.df[columns_to_impute])
-            st.sidebar.success("KNN imputation completed!")
+            st.session_state.temp_df[columns_to_impute] = imputer.fit_transform(st.session_state.df[columns_to_impute])
+            st.success("KNN imputation completed!")
         else:
-            st.sidebar.info("No columns selected for KNN imputation.")
+            st.info("No columns selected for KNN imputation.")
     else:
-        st.sidebar.info("No columns with missing values found for KNN imputation.")
+        st.info("No columns with missing values found for KNN imputation.")
 
 def add_column_based_on_conditions():
     st.subheader("Add Column Based on Conditions")
@@ -276,6 +276,7 @@ def download_processed_data():
         b64 = base64.b64encode(csv.encode()).decode()
         href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download Processed Data as CSV</a>'
         st.markdown(href, unsafe_allow_html=True)
+    
 def transform():
     if "df" not in st.session_state or st.session_state.df is None:
         st.warning("DataFrame not initialized. Please load the data first.")
