@@ -6,7 +6,7 @@ xgboost
 streamlit-toggle-switch
 replicate
 pandasai
-matplotlib
+matplotlib==3.4.3
 openai
 bs4
 scikit-learn
