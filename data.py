@@ -32,9 +32,10 @@ def data_run():
                 # if st.session_state.dataset_name == 'other_dataset':
                 #     data_dict = other_data_dict
 
-                # Show the dictionary data as an expander for better UI
-                with st.expander('Show data dictionary'):
-                    st.write(pd.DataFrame.from_dict(data_dict, orient='index', columns=['Description']))
+                # Show the dictionary data as an expandable row for better UI
+                for key, value in data_dict.items():
+                    with st.expander(key):
+                        st.text(value)
 
             except Exception as e:
                 st.sidebar.error(f"Error: {e}")
