@@ -155,8 +155,8 @@ def handle_cat_conditions(col, conditions_dict):
             # Let user select the condition from a dropdown
             condition = st.selectbox(f"Condition {i+1} for {col}:", unique_values)
             
-            # Let user select the output value from a dropdown
-            output_value = st.selectbox(f"Output value for condition {condition}:", unique_values)
+            # Let user input the output value
+            output_value = st.text_input(f"Output value for condition {condition}:")
             
             # Validate the condition and output value before storing them
             try:
@@ -171,7 +171,7 @@ def handle_cat_conditions(col, conditions_dict):
             st.session_state.cat_conditions += 1
             
         # Apply conditions to the dataframe
-        else_output_value = st.selectbox(f"Default output value if NO conditions are met for Categorical:", unique_values)
+        else_output_value = st.text_input(f"Default output value if NO conditions are met for Categorical:")
         
         try:
             # Allow user to name the new column, otherwise let the default occur
