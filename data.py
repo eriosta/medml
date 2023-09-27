@@ -145,54 +145,20 @@ def handle_numeric_conditions(col, conditions_dict):
 
 def handle_cat_conditions(col, conditions_dict):
     with st.container():
-        # Create a condition-input mechanism for the selected column
-        cat_conditions = st.session_state.get("cat_conditions", 1)
-        
-        for i in range(cat_conditions):
-            # Get unique values from the column
-            unique_values = st.session_state.temp_df[col].unique().tolist()
-            
-            # Let user select the condition from a dropdown
-            condition = st.selectbox(f"Condition {i+1} for {col}:", unique_values)
-            
-            # Let user input the output value
-            output_value = st.text_input(f"Output value for condition {condition}:")
-            
-            # Validate the condition and output value before storing them
-            try:
-                dummy_df = pd.DataFrame({col: ['dummy']})
-                dummy_df.query(f"{col} == '{condition}'")
-                conditions_dict[condition] = output_value
-            except:
-                st.warning(f"Invalid condition {condition} or output value {output_value} for column {col}.")
-        
-        # Allow user to add more conditions
-        if st.button("+ Add Another Condition for Categorical"):
-            st.session_state.cat_conditions += 1
-            
-        # Apply conditions to the dataframe
-        else_output_value = st.text_input(f"Default output value if NO conditions are met for Categorical:")
-        
+        # Perform one hot encoding on the selected column
         try:
-            # Allow user to name the new column, otherwise let the default occur
-            new_col_name = st.text_input("Enter new column name for Categorical:", f"{col}_new")
+            # Get the one hot encoding of the column
+            one_hot = pd.get_dummies(st.session_state.temp_df[col])
             
-            # Check if the new column already exists in the DataFrame
-            if new_col_name not in st.session_state.temp_df.columns:
-                # Initializing the new column with the default value
-                st.session_state.temp_df[new_col_name] = else_output_value
+            # Drop the original column as it is now encoded
+            st.session_state.temp_df = st.session_state.temp_df.drop(col, axis = 1)
             
-            for condition, value in conditions_dict.items():
-                condition_str = f"`{col}` == '{condition}'"
-                filtered_df = st.session_state.temp_df.query(condition_str)
-                st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
-            
-            # Ask for user confirmation before renaming the column
-            if st.button("Confirm column name for Categorical"):
-                st.write(f"Column {new_col_name} added to the DataFrame.")
+            # Join the encoded df with the original df
+            st.session_state.temp_df = st.session_state.temp_df.join(one_hot)
             
         except Exception as e:
-            st.warning(f"An error occurred while processing the conditions for Categorical. Error: {e}")
+            st.warning(f"An error occurred while performing one hot encoding on {col}. Error: {e}")
+            
     return conditions_dict
 
 def save_changes():
