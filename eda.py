@@ -1,5 +1,7 @@
 import streamlit as st
-from pandas_profiling import ProfileReport
+import json
+from ydata_profiling import ProfileReport
+from metadata import breast_cancer_data_dict
 
 def st_profile_report(report):
     with st.spinner('Rendering report...'):
@@ -12,7 +14,7 @@ def generate_eda():
         progress_bar = st.progress(0)
         progress_bar.progress(25)
         
-        profile = ProfileReport(df, title="Automated EDA Report", explorative=True)
+        profile = ProfileReport(df)
         progress_bar.progress(50)
     
         st_profile_report(profile)
@@ -22,6 +24,23 @@ def generate_eda():
         with open("eda_report.html", "rb") as f:
             report_data = f.read()
         progress_bar.progress(100)
+        
+        # Add dataset description and metadata
+        report = df.profile_report(
+            title="Breast Cancer Data",
+            dataset={
+                "description": "This profiling report was generated using the breast cancer dataset.",
+                "copyright_holder": "Your Company Name",
+                "copyright_year": 2022,
+                "url": "http://www.yourcompany.com/datasets/breast_cancer.csv",
+            },
+            variables={
+                "descriptions": breast_cancer_data_dict
+            }
+        )
+        report.to_file("eda_report.html")
         return report_data
     else:
         st.warning("Please load source data under **Data** first")
+
+

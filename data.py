@@ -24,19 +24,6 @@ def data_run():
                 st.session_state.dataset_name = fake_data_choice.split(".")[0]  # store dataset name to session state
                 st.write(st.session_state.df)
 
-                # Match the selected dataset with its data dictionary from metadata.py
-                from metadata import breast_cancer_data_dict
-                if st.session_state.dataset_name == 'breast_cancer':
-                    data_dict = breast_cancer_data_dict
-                # Add other data dictionaries as needed
-                # if st.session_state.dataset_name == 'other_dataset':
-                #     data_dict = other_data_dict
-
-                # Show the dictionary data as an expandable row for better UI
-                for key, value in data_dict.items():
-                    with st.expander(key):
-                        st.text(value)
-
             except Exception as e:
                 st.sidebar.error(f"Error: {e}")
 

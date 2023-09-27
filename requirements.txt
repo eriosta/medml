@@ -1,4 +1,4 @@
-pandas-profiling
+ydata-profiling
 shap
 streamlit
 kaggle
