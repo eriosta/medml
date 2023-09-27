@@ -12,7 +12,7 @@ def data_run():
             
     if data_source == "Synthetic Data":
 
-        fake_data_files = ["breast_cancer.py", "glaucoma.py", "iah.py", "ivh.py"]
+        fake_data_files = ["breast_cancer.csv", "glaucoma.csv", "iah.csv", "ivh.csv"]
         fake_data_choice = st.sidebar.selectbox("Choose a Fake Data File", fake_data_files)
 
         if fake_data_choice:
