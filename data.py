@@ -32,8 +32,8 @@ def data_run():
                 # if st.session_state.dataset_name == 'other_dataset':
                 #     data_dict = other_data_dict
 
-                # Show the dictionary data as an expandable df
-                if st.sidebar.checkbox('Show data dictionary'):
+                # Show the dictionary data as an expander for better UI
+                with st.sidebar.expander('Show data dictionary'):
                     st.write(pd.DataFrame.from_dict(data_dict, orient='index', columns=['Description']))
 
             except Exception as e:
