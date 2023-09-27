@@ -1,4 +1,4 @@
-ydata-profiling==1.16.0
+ydata-profiling==4.5.1
 shap
 streamlit
 kaggle
