@@ -22,6 +22,10 @@ def prepare_data(df, target_var, training_vars, categorical_vars, test_size=0.2)
     # Extract features and target from dataframe
     X = df[training_vars]
     y = df[target_var]
+    unique_values = y.unique()
+    if len(unique_values) > 2 or not set(unique_values).issubset({0, 1}):
+        y = (y == unique_values[0]).astype(int)
+        st.toast(f'Target variable has been binarized. {unique_values[0]} is set to 1 and {unique_values[1]} is set to 0. Click OK to continue.', duration=None)
 
     # Encode categorical variables (if there are any)
     if categorical_vars:

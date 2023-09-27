@@ -90,9 +90,12 @@ class DataPage:
         if data_page == 'Source':
             data_run()
         elif data_page == "Exploratory Analysis":
-            generate_eda()
+            st.info("Under Development")
+            # generate_eda()
         elif data_page == "Transformation":
-            transform()
+            st.info("Under Development")
+
+            # transform()
 
 class ModelsPage:
     def __init__(self):
