@@ -98,95 +98,102 @@ def add_column_based_on_conditions():
     return conditions_dict
 
 def handle_numeric_conditions(col, conditions_dict):
-    # Create a condition-input mechanism for the selected column
-    num_conditions = st.session_state.get("num_conditions", 1)
-    
-    for i in range(num_conditions):
-        condition = st.text_input(f"Condition {i+1} for {col} (e.g., > 50):")
-        output_value = st.text_input(f"Output value for condition {condition}:")
+    with st.container():
+        # Create a condition-input mechanism for the selected column
+        num_conditions = st.session_state.get("num_conditions", 1)
         
-        # Validate the condition and output value before storing them
+        for i in range(num_conditions):
+            condition = st.text_input(f"Condition {i+1} for {col} (e.g., > 50):")
+            output_value = st.text_input(f"Output value for condition {condition}:")
+            
+            # Validate the condition and output value before storing them
+            try:
+                dummy_df = pd.DataFrame({col: [0]})
+                dummy_df.query(f"{col} {condition}")
+                conditions_dict[condition] = float(output_value)
+            except:
+                st.warning(f"Invalid condition {condition} or output value {output_value} for column {col}.")
+        
+        # Allow user to add more conditions
+        if st.button("+ Add Another Condition"):
+            st.session_state.num_conditions += 1
+            
+        # Apply conditions to the dataframe
+        else_output_value = st.text_input(f"Default output value if NO conditions are met:")
+        
         try:
-            dummy_df = pd.DataFrame({col: [0]})
-            dummy_df.query(f"{col} {condition}")
-            conditions_dict[condition] = float(output_value)
-        except:
-            st.warning(f"Invalid condition {condition} or output value {output_value} for column {col}.")
-    
-    # Allow user to add more conditions
-    if st.button("+ Add Another Condition"):
-        st.session_state.num_conditions += 1
-        
-    # Apply conditions to the dataframe
-    else_output_value = st.text_input(f"Default output value if NO conditions are met:")
-    
-    try:
-        # Allow user to name the new column, otherwise let the default occur
-        new_col_name = st.text_input("Enter new column name:", f"{col}_new")
-        
-        # Check if the new column already exists in the DataFrame
-        if new_col_name not in st.session_state.temp_df.columns:
-            # Initializing the new column with the default value
-            st.session_state.temp_df[new_col_name] = float(else_output_value)
-        
-        for condition, value in conditions_dict.items():
-            condition_str = f"`{col}` {condition}"
-            filtered_df = st.session_state.temp_df.query(condition_str)
-            st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
-        
-        # Ask for user confirmation before renaming the column
-        if st.button("Confirm column name"):
-            st.write(f"Column {new_col_name} added to the DataFrame.")
-        
-    except Exception as e:
-        st.warning(f"An error occurred while processing the conditions. Error: {e}")
+            # Allow user to name the new column, otherwise let the default occur
+            new_col_name = st.text_input("Enter new column name:", f"{col}_new")
+            
+            # Check if the new column already exists in the DataFrame
+            if new_col_name not in st.session_state.temp_df.columns:
+                # Initializing the new column with the default value
+                st.session_state.temp_df[new_col_name] = float(else_output_value)
+            
+            for condition, value in conditions_dict.items():
+                condition_str = f"`{col}` {condition}"
+                filtered_df = st.session_state.temp_df.query(condition_str)
+                st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
+            
+            # Ask for user confirmation before renaming the column
+            if st.button("Confirm column name"):
+                st.write(f"Column {new_col_name} added to the DataFrame.")
+            
+        except Exception as e:
+            st.warning(f"An error occurred while processing the conditions. Error: {e}")
     return conditions_dict
 
 def handle_cat_conditions(col, conditions_dict):
-    # Create a condition-input mechanism for the selected column
-    cat_conditions = st.session_state.get("cat_conditions", 1)
-    
-    for i in range(cat_conditions):
-        condition = st.text_input(f"Condition {i+1} for {col} (e.g., == 'red'):")
-        output_value = st.text_input(f"Output value for condition {condition}:")
+    with st.container():
+        # Create a condition-input mechanism for the selected column
+        cat_conditions = st.session_state.get("cat_conditions", 1)
         
-        # Validate the condition and output value before storing them
+        for i in range(cat_conditions):
+            # Get unique values from the column
+            unique_values = st.session_state.temp_df[col].unique().tolist()
+            
+            # Let user select the condition from a dropdown
+            condition = st.selectbox(f"Condition {i+1} for {col}:", unique_values)
+            
+            # Let user select the output value from a dropdown
+            output_value = st.selectbox(f"Output value for condition {condition}:", unique_values)
+            
+            # Validate the condition and output value before storing them
+            try:
+                dummy_df = pd.DataFrame({col: ['dummy']})
+                dummy_df.query(f"{col} == '{condition}'")
+                conditions_dict[condition] = output_value
+            except:
+                st.warning(f"Invalid condition {condition} or output value {output_value} for column {col}.")
+        
+        # Allow user to add more conditions
+        if st.button("+ Add Another Condition for Categorical"):
+            st.session_state.cat_conditions += 1
+            
+        # Apply conditions to the dataframe
+        else_output_value = st.selectbox(f"Default output value if NO conditions are met for Categorical:", unique_values)
+        
         try:
-            dummy_df = pd.DataFrame({col: ['dummy']})
-            dummy_df.query(f"{col} {condition}")
-            conditions_dict[condition] = output_value
-        except:
-            st.warning(f"Invalid condition {condition} or output value {output_value} for column {col}.")
-    
-    # Allow user to add more conditions
-    if st.button("+ Add Another Condition for Categorical"):
-        st.session_state.cat_conditions += 1
-        
-    # Apply conditions to the dataframe
-    else_output_value = st.text_input(f"Default output value if NO conditions are met for Categorical:")
-    
-    try:
-        # Allow user to name the new column, otherwise let the default occur
-        new_col_name = st.text_input("Enter new column name for Categorical:", f"{col}_new")
-        
-        # Check if the new column already exists in the DataFrame
-        if new_col_name not in st.session_state.temp_df.columns:
-            # Initializing the new column with the default value
-            st.session_state.temp_df[new_col_name] = else_output_value
-        
-        for condition, value in conditions_dict.items():
-            condition_str = f"`{col}` {condition}"
-            filtered_df = st.session_state.temp_df.query(condition_str)
-            st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
-        
-        # Ask for user confirmation before renaming the column
-        if st.button("Confirm column name for Categorical"):
-            st.write(f"Column {new_col_name} added to the DataFrame.")
-        
-    except Exception as e:
-        st.warning(f"An error occurred while processing the conditions for Categorical. Error: {e}")
+            # Allow user to name the new column, otherwise let the default occur
+            new_col_name = st.text_input("Enter new column name for Categorical:", f"{col}_new")
+            
+            # Check if the new column already exists in the DataFrame
+            if new_col_name not in st.session_state.temp_df.columns:
+                # Initializing the new column with the default value
+                st.session_state.temp_df[new_col_name] = else_output_value
+            
+            for condition, value in conditions_dict.items():
+                condition_str = f"`{col}` == '{condition}'"
+                filtered_df = st.session_state.temp_df.query(condition_str)
+                st.session_state.temp_df.loc[st.session_state.temp_df.index.isin(filtered_df.index), new_col_name] = value
+            
+            # Ask for user confirmation before renaming the column
+            if st.button("Confirm column name for Categorical"):
+                st.write(f"Column {new_col_name} added to the DataFrame.")
+            
+        except Exception as e:
+            st.warning(f"An error occurred while processing the conditions for Categorical. Error: {e}")
     return conditions_dict
-
 
 def save_changes():
     # Button to save changes
