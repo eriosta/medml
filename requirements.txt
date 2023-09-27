@@ -1,4 +1,4 @@
-ydata-profiling
+ydata-profiling==1.16.0
 shap
 streamlit
 kaggle
@@ -6,7 +6,7 @@ xgboost
 streamlit-toggle-switch
 replicate
 pandasai
-matplotlib==3.4.3
+matplotlib
 openai
 bs4
 scikit-learn
