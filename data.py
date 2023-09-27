@@ -18,6 +18,9 @@ def data_run():
         if fake_data_choice:
             try:
                 st.session_state.df = pd.read_csv(f"fake_data/{fake_data_choice}")
+                st.session_state.df.reset_index(drop=True, inplace=True)  # Drop the index
+                if 'Unnamed: 0' in st.session_state.df.columns:
+                    st.session_state.df.drop(columns=['Unnamed: 0'], inplace=True)  # Drop the column "Unnamed: 0"
                 st.session_state.dataset_name = fake_data_choice.split(".")[0]  # store dataset name to session state
                 st.write(st.session_state.df)
             except Exception as e:
@@ -36,6 +39,9 @@ def data_run():
                 st.sidebar.success("Excel file uploaded!")
                 st.session_state.df = pd.read_excel(uploaded_file)
 
+            st.session_state.df.reset_index(drop=True, inplace=True)  # Drop the index
+            if 'Unnamed: 0' in st.session_state.df.columns:
+                st.session_state.df.drop(columns=['Unnamed: 0'], inplace=True)  # Drop the column "Unnamed: 0"
             st.session_state.dataset_name = uploaded_file.name  # store actual filename to session state
             st.write(st.session_state.df)
 
