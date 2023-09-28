@@ -3,8 +3,8 @@
 import numpy as np
 import pandas as pd
 
-n_without_IVH = 73
-n_with_IVH = 41
+n_without_IVH = 73*100
+n_with_IVH = 41*100
 
 # Without IVH Group
 without_IVH_data = {
