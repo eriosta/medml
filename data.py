@@ -12,7 +12,7 @@ def data_run():
             
     if data_source == "Synthetic Data":
 
-        fake_data_files = ["breast_cancer.csv", "glaucoma.csv", "iah.csv", "ivh.csv"]
+        fake_data_files = ["ivh.csv"]
         fake_data_choice = st.sidebar.selectbox("Choose a Fake Data File", fake_data_files)
 
         if fake_data_choice:
@@ -158,7 +158,7 @@ def handle_cat_conditions(col, conditions_dict):
             
         except Exception as e:
             st.warning(f"An error occurred while performing one hot encoding on {col}. Error: {e}")
-            
+
     return conditions_dict
 
 def save_changes():

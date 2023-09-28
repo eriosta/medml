@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 # Define the number of samples for each category
-n_samples_main = 4247
+n_samples_main = 10
 
 # Generate main synthetic data
 main_data = {
@@ -36,10 +36,5 @@ while len(unique_ids) < n_samples_main:
 
 df_main['patient_id'] = list(unique_ids)
 
-# Adjust probabilities based on risk
-df_main.loc[df_main['DL 5-y risk'].str.contains('Increased'), 'Mammographic breast density'] = np.random.choice(['Fatty', 'Scattered fibroglandular', 'Heterogeneously dense', 'Extremely dense'], len(df_main[df_main['DL 5-y risk'].str.contains('Increased')]), p=[0.01, 0.2, 0.5, 0.29])
-df_main.loc[df_main['DL 5-y risk'].str.contains('Increased'), 'Personal history of breast cancer'] = np.random.choice(['No', 'Yes'], len(df_main[df_main['DL 5-y risk'].str.contains('Increased')]), p=[0.3, 0.7])
-df_main.loc[df_main['DL 5-y risk'].str.contains('Increased'), 'Family history of breast cancer'] = np.random.choice(['No', 'Yes'], len(df_main[df_main['DL 5-y risk'].str.contains('Increased')]), p=[0.1, 0.9])
-df_main.loc[df_main['DL 5-y risk'].str.contains('Increased'), 'Screening indication'] = np.random.choice(['Genetic mutation', 'History of chest radiation', 'Personal history of breast cancer', 'Family history of breast cancer', 'Personal history of high-risk lesion', 'Other'], len(df_main[df_main['DL 5-y risk'].str.contains('Increased')]), p=[0.2, 0.05, 0.3, 0.3, 0.1, 0.05])
+(df_main).to_csv("fake_data/breast_cancer.csv")
 
-(df_main).to_csv("breast_cancer.csv")
